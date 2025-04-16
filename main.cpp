@@ -21,6 +21,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
+//文字列を格納する
+std::string str0{ "STRING!!!" };
+
+//整数を文字列にする
+std::string str1{ std::to_string(10) };
+
+
 void Log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
 }
@@ -84,10 +91,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	}
 
+	//変数から型を推測する
+	Log(std::format("enemyHp:{},texturePath:{}\n", enemyHp,
+		texturePath));
 
-	Log(std::format("enemyHp:{},texturePath:{}\n", enemyHp, texturePath));
-
-	Log(std::format("enemyHp:{},texturePath:{}\n", enemyHp));
+	
 
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
