@@ -1,5 +1,8 @@
 #include <Windows.h>
 #include <cstdint>
+#include <string>
+#include <format>
+
 
 
 //ウィンドウプロシージャ
@@ -17,6 +20,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 	//標準のメッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
+
+void Log(const std::string& message) {
+	OutputDebugStringA(message.c_str());
+}
+int enemyHp = 5;
+int texturePath = 5;
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -75,6 +84,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	}
 
+
+	Log(std::format("enemyHp:{},texturePath:{}\n", enemyHp, texturePath));
+
+	Log(std::format("enemyHp:{},texturePath:{}\n", enemyHp));
 
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
