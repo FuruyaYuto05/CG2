@@ -279,25 +279,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 	IDxcIncludeHandler* includeHandler = nullptr;
-	hr - dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
+	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
 
-	IDxcBlob* CompileShader(
-		const std::wstring& filePath,
-		const wchar_t* profile,
-		IDxcUtils* dxcUtils,
-		IDxcCompiler3* dxcCompiler,
-		IDxcIncludeHandler* includeHandler)
-	{
-		Log(ConverString(std::format(L"Begin CompliteShader,path:{},profile:{}\n", filePath, profile)));
-		IDxcBlobEncoding* shaderSource ＝ nullptr;
-		HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
-		assert(SUCCEEDED(hr));
-		DxcBuffer shaderSourceBuffer;
-		shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-		shaderSourceBuffer.Size = shaderSource->GetBufferSize();
-		shaderSourceBuffer.Encoding = DXC_CP_UTF8;
-	}
+	
 	
 
 	MSG msg{};
@@ -385,7 +370,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif // _DEBUG
 	CloseWindow(hwnd);
 
-	infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+	
 
 	IDXGIDebug1* debug;
 	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
