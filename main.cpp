@@ -6,7 +6,9 @@
 #include <dxgi1_6.h>
 #include <cassert>
 #include <dxgidebug.h>
+#include <dxcapi.h>
 
+#pragma comment(lib,"dxcompiler.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
@@ -268,8 +270,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 
-	
+	//dxCompilerを初期化
+	IDxcUtils* dxcUtils = nullptr;
+	IDxcCompiler3* dxcCompiler = nullptr;
+	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
+	assert(SUCCEEDED(hr));
+	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
+	assert(SUCCEEDED(hr));
 
+	IDxcIncludeHandler* includeHandler = nullptr;
+	hr - dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
+	assert(SUCCEEDED(hr));
+
+	IDxcBlob* CompileShader(
+		const std::wstring& filePath,
+		const wchar_t* profile,
+		IDxcUtils* dxcUtils,
+		IDxcCompiler3* dxcCompiler,
+		IDxcIncludeHandler* includeHandler)
+	{
+		Log(ConverString(std::format(L"Begin CompliteShader,path:{},profile:{}\n", filePath, profile)));
+		IDxcBlobEncoding* shaderSource ＝ nullptr;
+		HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+		assert(SUCCEEDED(hr));
+		DxcBuffer shaderSourceBuffer;
+		shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
+		shaderSourceBuffer.Size = shaderSource->GetBufferSize();
+		shaderSourceBuffer.Encoding = DXC_CP_UTF8;
+	}
 	
 
 	MSG msg{};
