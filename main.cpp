@@ -962,7 +962,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 			*wvpData = worldViewProjectionMatrix;
 
-			*wvpData = worldMatrix;
+			//*wvpData = worldMatrix;
 
 
 			//開発用UIの処理
