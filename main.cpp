@@ -1160,6 +1160,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Begin("Settings");
 			ImGui::ColorEdit4("material", &materialData->x, ImGuiColorEditFlags_AlphaPreview);
 			ImGui::DragFloat("rotate.y", &transform.rotate.y, 0.1f);
+			ImGui::DragFloat2("Sprite transform", &transformSprite.translate.x, 1.0f);
+			ImGui::DragFloat3("transform", &transform.translate.x, 0.1f);
 			ImGui::End();
 
 			//ImGuiの内部コマンド生成
