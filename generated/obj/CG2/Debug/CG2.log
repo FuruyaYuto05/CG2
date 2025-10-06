@@ -1,3 +1,11 @@
-﻿  CG2.vcxproj -> C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\generated\outputs\Debug\CG2.exe
+﻿  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_dx12.cpp
+  imgui_impl_win32.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  main.cpp
+  CG2.vcxproj -> C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\generated\outputs\Debug\CG2.exe
           1 個のファイルをコピーしました。
           1 個のファイルをコピーしました。
