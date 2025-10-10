@@ -248,7 +248,40 @@ struct VertexData
 {
 	Vector4 position;
 	Vector2 texcoord;
+	Vector3 normal;
 };
+
+struct Material {
+	Vector4 color;
+	int32_t enableLighting;
+};
+
+struct  TransformationMatrix{
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+};
+
+struct DirectionalLight
+{
+	Vector4 color;
+	Vector3 direction;
+	float intensity;
+};
+
+// 内積
+float Dot(const Vector3& v1, const Vector3& v2) { return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z; }
+
+// 長さ
+float Length(const Vector3& v) { return std::sqrt(Dot(v, v)); }
+
+// 正規化
+Vector3 Normalize(const Vector3& v) {
+	float length = Length(v);
+	if (length == 0.0f) {
+		return v; // 長さが0の場合はそのまま返す（ゼロ除算を防ぐ）
+	}
+	return { v.x / length, v.y / length, v.z / length };
+}
 
 // 単位行列
 Matrix4x4 MakeIdentity4x4() {
@@ -756,7 +789,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	//RootParmater作成
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;
@@ -767,6 +800,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[3].Descriptor.ShaderRegister = 1;
+	
+	
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
 
@@ -795,7 +833,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 
-	D3D12_INPUT_ELEMENT_DESC inputElementDesc[2] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDesc[3] = {};
 	inputElementDesc[0].SemanticName = "POSITION";
 	inputElementDesc[0].SemanticIndex = 0;
 	inputElementDesc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -804,6 +842,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputElementDesc[1].SemanticIndex = 0;
 	inputElementDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDesc[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDesc[2].SemanticName = "NORMAL";
+	inputElementDesc[2].SemanticIndex = 0;
+	inputElementDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDesc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+
 	D3D12_INPUT_LAYOUT_DESC inputLayOutDesc{};
 	inputLayOutDesc.pInputElementDescs = inputElementDesc;
 	inputLayOutDesc.NumElements = _countof(inputElementDesc);
@@ -902,30 +946,52 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			vertexData[startIndex].position.z = std::cos(lat) * std::sin(lon);
 			vertexData[startIndex].position.w = 1.0f;
 			vertexData[startIndex].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex) / float(kSubdivision) };
+			vertexData[startIndex].normal.x = vertexData[startIndex].position.x;
+			vertexData[startIndex].normal.y = vertexData[startIndex].position.y;
+			vertexData[startIndex].normal.z = vertexData[startIndex].position.z;
+
 
 			vertexData[startIndex + 1].position.x = std::cos(lat + kLatEvery) * std::cos(lon);
 			vertexData[startIndex + 1].position.y = std::sin(lat + kLatEvery);
 			vertexData[startIndex + 1].position.z = std::cos(lat + kLatEvery) * std::sin(lon);
 			vertexData[startIndex + 1].position.w = 1.0f;
 			vertexData[startIndex + 1].texcoord = { float(lonIndex) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexData[startIndex + 1].normal.x = vertexData[startIndex + 1].position.x;
+			vertexData[startIndex + 1].normal.y = vertexData[startIndex + 1].position.y;
+			vertexData[startIndex + 1].normal.z = vertexData[startIndex + 1].position.z;
+
 
 			vertexData[startIndex + 2].position.x = std::cos(lat) * std::cos(lon + kLonEvery);
 			vertexData[startIndex + 2].position.y = std::sin(lat);
 			vertexData[startIndex + 2].position.z = std::cos(lat) * std::sin(lon + kLonEvery);
 			vertexData[startIndex + 2].position.w = 1.0f;
 			vertexData[startIndex + 2].texcoord = { float(lonIndex + 1) / float(kSubdivision),1.0f - float(latIndex) / float(kSubdivision) };
+			vertexData[startIndex + 2].normal.x = vertexData[startIndex + 2].position.x;
+			vertexData[startIndex + 2].normal.y = vertexData[startIndex + 2].position.y;
+			vertexData[startIndex + 2].normal.z = vertexData[startIndex + 2].position.z;
+
+
 
 			vertexData[startIndex + 3] = vertexData[startIndex + 2];
+			//vertexData[startIndex + 3].normal.x = vertexData[startIndex + 3].position.x;
+			//vertexData[startIndex + 3].normal.y = vertexData[startIndex + 3].position.y;
+			//vertexData[startIndex + 3].normal.z = vertexData[startIndex + 3].position.z;
 			vertexData[startIndex + 4] = vertexData[startIndex + 1];
+			//vertexData[startIndex + 4].normal.x = vertexData[startIndex + 4].position.x;
+			//vertexData[startIndex + 4].normal.y = vertexData[startIndex + 4].position.y;
+			//vertexData[startIndex + 4].normal.z = vertexData[startIndex + 4].position.z;
+
 
 			vertexData[startIndex + 5].position.x = std::cos(lat + kLatEvery) * std::cos(lon + kLonEvery);
 			vertexData[startIndex + 5].position.y = std::sin(lat + kLatEvery);
 			vertexData[startIndex + 5].position.z = std::cos(lat + kLatEvery) * std::sin(lon + kLonEvery);
 			vertexData[startIndex + 5].position.w = 1.0f;
 			vertexData[startIndex + 5].texcoord = { float(lonIndex + 1) / float(kSubdivision),1.0f - float(latIndex + 1) / float(kSubdivision) };
+			vertexData[startIndex + 5].normal.x = vertexData[startIndex + 5].position.x;
+			vertexData[startIndex + 5].normal.y = vertexData[startIndex + 5].position.y;
+			vertexData[startIndex + 5].normal.z = vertexData[startIndex + 5].position.z;
 
-
-
+			
 		}
 	}
 
@@ -951,19 +1017,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//マテリアル用のリソースを作る
 
 
-	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
+	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Material));
 
-	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
-	Matrix4x4* wvpData = nullptr;
+	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(TransformationMatrix));
+	TransformationMatrix* wvpData = nullptr;
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	*wvpData = MakeIdentity4x4();
+	wvpData->WVP = MakeIdentity4x4();
+	wvpData->World = MakeIdentity4x4();
 
-	Vector4* materialData = nullptr;
+	Material* materialData = nullptr;
 
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
-	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-
+	materialData->color= Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData->enableLighting = true;
 
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
@@ -1054,18 +1121,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };
 	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
 
-	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(TransformationMatrix));
 
-	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	TransformationMatrix* transformationMatrixDataSprite = nullptr;
 
 	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
 
-	*transformationMatrixDataSprite = MakeIdentity4x4();
+	transformationMatrixDataSprite->WVP = MakeIdentity4x4();
+	transformationMatrixDataSprite->World = MakeIdentity4x4();
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
 	bool useMonsterBall = true;
+
+
+	//スプライとのマテリアル用のリソースを作る
+	ID3D12Resource* materialResourceSprite = CreateBufferResource(device, sizeof(Material));
+
+	Material* materialDataSprite = nullptr;
+	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
+	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataSprite->enableLighting = false;
+
+	//ライト用のリソースを作る
+	ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
+	DirectionalLight* directionalLightData = nullptr;
+	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
+	directionalLightData->color={ 1.0f,1.0f,1.0f,1.0f };
+	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
+	directionalLightData->intensity = 1.0f;
 
 
 	MSG msg{};
@@ -1084,8 +1169,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 			Matrix4x4 projectionMatrixSprite = MakeOrthorgraphicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
-			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
-
+			transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
+			transformationMatrixDataSprite->World = worldMatrixSprite;
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -1096,7 +1181,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-			*wvpData = worldViewProjectionMatrix;
+			wvpData->WVP = worldViewProjectionMatrix;
+			wvpData->World = worldMatrix;
 
 			//*wvpData = worldMatrix;
 
@@ -1105,10 +1191,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ShowDemoWindow();
 
 			ImGui::Begin("Settings");
-			ImGui::ColorEdit4("material", &materialData->x, ImGuiColorEditFlags_AlphaPreview);
+			ImGui::ColorEdit4("material", &materialData->color.x, ImGuiColorEditFlags_AlphaPreview);
 			
+			ImGui::DragFloat3("light", &directionalLightData->direction.x, 0.01f, -1.0f, 1.0f);
+			// enableLighting が true になっているか確認
+			bool lightingEnabled = (materialData->enableLighting != 0);
+			ImGui::Checkbox("Enable Lighting", &lightingEnabled);
+			materialData->enableLighting = lightingEnabled ? 1 : 0;
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
 			ImGui::End();
+
+			directionalLightData->direction = Normalize(directionalLightData->direction);
 
 			//ImGuiの内部コマンド生成
 			ImGui::Render();
@@ -1150,6 +1243,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+
 			//マテリアルCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
@@ -1158,6 +1253,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//srv用のCBufferの場所を設定
 			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
+
+			//DirectionLightのCBuffer
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
 			commandList->DrawInstanced(kNumSphereVertices, 1, 0, 0);
 
@@ -1218,6 +1316,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	directionalLightResource->Release();
 
 	transformationMatrixResourceSprite->Release();
 	vertexResourceSprite->Release();
