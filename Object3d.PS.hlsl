@@ -18,7 +18,15 @@ PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
     float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
-    output.color = gMaterial.color*textureColor;
- 
+    
+    // スライドの内容を反映: textureColor.aの値が0.5以下のときにPixelを破棄
+    if (textureColor.a <= 0.5)
+    {
+        discard; // ピクセルを破棄し、後続の処理（深度書き込み、色合成など）を行わない
+    }
+    
+    // 破棄されなかったピクセルについて通常通り色を計算
+    output.color = gMaterial.color * textureColor;
+    
     return output;
 }
