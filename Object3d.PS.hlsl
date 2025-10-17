@@ -45,16 +45,22 @@ PixelShaderOutput main(VertexShaderOutput input)
         // 1. [-1, 1] を [0, 1] に変換
         float32_t halfLambertRamp = NdotL * 0.5f + 0.5f;
         
-        // 2. 2乗して拡散反射光の係数（cos）とする
+        // 2. 2乗して拡散反射光の係数（diffuse）とする
         float32_t diffuse = pow(halfLambertRamp, 2.0f);
         
         // 最終的な出力カラーを計算
-        // (マテリアルカラー * テクスチャカラー) * ライトカラー * 拡散反射光係数 * ライト強度
-        output.color = gMaterial.color * textureColor * gDirectionalLight.color * diffuse * gDirectionalLight.intensity;
+        
+        // 💡 修正箇所1: RGB成分 (ライティングと強度を適用)
+        output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * diffuse * gDirectionalLight.intensity;
+        
+        // 💡 修正箇所2: アルファ成分 (テクスチャとマテリアルのアルファ値のみを適用)
+        // ライティング計算（intensityなど）の影響を受けないように分離
+        output.color.a = gMaterial.color.a * textureColor.a;
+        
     }
     else
     {
-        // ライティング無効の場合
+        // ライティング無効の場合 (RGBとAを分離する必要なし、単に積算)
         output.color = gMaterial.color * textureColor;
     }
     
