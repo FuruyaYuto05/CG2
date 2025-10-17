@@ -268,6 +268,69 @@ struct DirectionalLight
 	float intensity;
 };
 
+enum BlendMode {
+	kBlendModeNone,
+	kBlendModeNormal,
+	kBlendModeAdd,
+	kBlendModeSubtract,
+	kBlendModeMultiply,
+	kBlendModeScreen,
+	kCountOfBlendMode,
+};
+
+// BlendModeの設定に応じてD3D12_BLEND_DESCを書き換える関数
+D3D12_BLEND_DESC CreateBlendState(BlendMode blendMode) {
+	D3D12_BLEND_DESC blendDesc{};
+	// デフォルトでブレンドターゲット0のマスクを全書き込み可能にする
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	switch (blendMode) {
+	case BlendMode::kBlendModeNone:
+		// ブレンドなし (不透明)
+		blendDesc.RenderTarget[0].BlendEnable = FALSE;
+		break;
+
+	case BlendMode::kBlendModeNormal:
+		// 通常ブレンド (半透明) : Src * SrcA + Dest * (1 - SrcA)
+		blendDesc.RenderTarget[0].BlendEnable = TRUE;
+		blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+		blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+		break;
+
+	case BlendMode::kBlendModeAdd:
+		// 加算ブレンド : Src * 1 + Dest * 1
+	
+		break;
+
+	case BlendMode::kBlendModeSubtract:
+		// 減算ブレンド : Dest * 1 - Src * 1
+
+		// 演算を SUBTRACT に設定し、Dest から Src を引く
+		
+		break;
+
+	case BlendMode::kBlendModeMultiply:
+		// 乗算ブレンド : Src * Dest + Dest * 0
+	
+		break;
+
+	case BlendMode::kBlendModeScreen:
+		// スクリーンブレンド : Src * 1 + Dest * (1 - Src)
+		
+		break;
+
+	default:
+		blendDesc.RenderTarget[0].BlendEnable = FALSE;
+		break;
+	}
+
+	return blendDesc;
+}
+
 // 内積
 float Dot(const Vector3& v1, const Vector3& v2) { return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z; }
 
@@ -1144,6 +1207,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	bool useMonsterBall = true;
 
+	// ... (既存の Transform や bool useMonsterBall の初期化がある場所の近くに追加)
+
+// BlendMode の現在の設定を保持する変数
+	BlendMode currentBlendMode = BlendMode::kBlendModeNormal; // デフォルトは通常ブレンド
 
 	//スプライとのマテリアル用のリソースを作る
 	ID3D12Resource* materialResourceSprite = CreateBufferResource(device, sizeof(Material));
@@ -1206,6 +1273,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			
 			ImGui::DragFloat("Intensity", &directionalLightData->intensity, 0.01f, 0.0f, 10.0f); // 0.01刻み、最小0.0、最大10.0
 			
+			//BlendMode ImGui の追加
+			const char* blendModeItems[] = { "None", "Normal (Alpha)", "Add", "Subtract", "Multiply", "Screen" };
+			int currentItem = static_cast<int>(currentBlendMode);
+			if (ImGui::Combo("BlendMode", &currentItem, blendModeItems, IM_ARRAYSIZE(blendModeItems))) {
+				currentBlendMode = static_cast<BlendMode>(currentItem);
+			}
+
 			// enableLighting が true になっているか確認
 			bool lightingEnabled = (materialData->enableLighting != 0);
 			ImGui::Checkbox("Enable Lighting", &lightingEnabled);
