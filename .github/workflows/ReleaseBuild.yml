@@ -5,7 +5,7 @@ on:
       - master
 env:
   #リポジリトのルートディレクトリを起点としたソリューションファイルのパス
-  SOLUTION_FILE_PATH: pCG2.sln
+  SOLUTION_FILE_PATH: CG2.sln
 
   CONFIGURATION: Release
 
