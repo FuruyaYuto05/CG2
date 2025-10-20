@@ -19,7 +19,8 @@ uses: actions/checkout@v5
 
 -name: Add MSBuild to PATH
 uses: microsoft/setup-msbuild@v2
-with: msbuild-architecture: x64
+with:
+msbuild-architecture: x64
 
 -name: Build
 run: |
