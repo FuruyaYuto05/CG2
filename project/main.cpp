@@ -1,6 +1,8 @@
 #define DIRECTINPUT_VERSION     0x0800
 #include <dinput.h>
 
+#include "Input.h"
+
 #include <Windows.h>
 #include <cstdint>
 #include <string>
@@ -612,7 +614,7 @@ void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mip
 
 
 // Windowsアプリでのエントリーポイント(main関数)
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
 
 
@@ -818,33 +820,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
 
+	//ポインタ
+	Input* input = nullptr;
+	//入力の初期化
+	input = new Input();
+	input->Initialize(hInstance,hwnd);
 
-// ------------------------------------------------------------------
-// ★ ここにDirectInputの初期化を追加します
-// ------------------------------------------------------------------
+	//入力の更新
+	input->Update();
 
-// DirectInputオブジェクトの生成
-	IDirectInput8* directInput = nullptr; // ① グローバル変数（またはWinMain外）として宣言されている場合もあります
-	HRESULT result = DirectInput8Create(
-		GetModuleHandle(nullptr), // ② WinMainのhInstaceでもOKですが、ここではモジュールハンドルを取得しています
-		DIRECTINPUT_VERSION,
-		IID_IDirectInput8,
-		(void**)&directInput,
-		nullptr
-	);
-	assert(SUCCEEDED(result));
 
-	//キーボードデバイスの生成
-	IDirectInputDevice8* keyboard = nullptr;
-	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	assert(SUCCEEDED(result));
-
-	result = keyboard->SetDataFormat(&c_dfDIKeyboard);
-	assert(SUCCEEDED(result));
-
-	result = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEEDED(result));
-
+	//入力解放
+	delete input;
 
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
@@ -1166,16 +1153,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else {
-			//キーボード情報の取得開始
-			keyboard->Acquire();
+			
 
-			//全キーの入力状態を取得する
-			BYTE key[256] = {};
-			keyboard->GetDeviceState(sizeof(key), key);
-
-			if (key[DIK_0]) {
+			/*if (key[DIK_0]) {
 				OutputDebugStringA("Hit 0\n");
-			}
+			}*/
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();

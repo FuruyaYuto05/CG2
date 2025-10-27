@@ -1,0 +1,32 @@
+#pragma once
+#define DIRECTINPUT_VERSION   0x0800
+#include <dinput.h>
+
+#include <dinput.h>
+#include <windows.h>
+#include <wrl.h>
+
+class Input
+{
+public:
+
+    //namespace省略
+    template <class T> using Comptr = Microsoft::WRL::ComPtr<T>;
+
+public: // メンバ関数
+    // 初期化関数にHINSTANCEとHWNDを追加
+    void Initialize(HINSTANCE hInstance, HWND hwnd);
+    // 更新
+    void Update();
+
+private: // メンバ変数（外部から直接アクセスさせない）
+    // DirectInputオブジェクト
+    IDirectInput8* directInput_ = nullptr;
+
+    // キーボードデバイス
+    IDirectInputDevice8* keyboard;
+
+    // キーボードの現在の状態を保持する配列
+    // 256個のキーの状態（押されているか、離されているか）を格納します。
+    BYTE keyState_[256] = {};
+};
