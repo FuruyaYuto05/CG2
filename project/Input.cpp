@@ -1,5 +1,3 @@
-
-
 #include "Input.h"
 #include <cassert>
 
@@ -8,12 +6,32 @@
 #pragma comment(lib,"dxguid.lib")
 
 
+// コンストラクタの定義
+Input::Input()
+{
+	// 初期化は Initialize で行うため、ここでは何もしなくてOK
+}
+
+// デストラクタの定義
+Input::~Input()
+{
+	// DirectInputリソースの解放 (Release) 処理があればここで行う
+	if (keyboard) {
+		keyboard->Unacquire(); // デバイスの解放
+		keyboard->Release();
+		keyboard = nullptr;
+	}
+	if (directInput) {
+		directInput->Release();
+		directInput = nullptr;
+	}
+}
 
 void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 {
 
 	// DirectInputオブジェクトの生成
-	IDirectInput8* directInput = nullptr; // ① グローバル変数（またはWinMain外）として宣言されている場合もあります
+	
 	HRESULT result = DirectInput8Create(
 		GetModuleHandle(nullptr), // ② WinMainのhInstaceでもOKですが、ここではモジュールハンドルを取得しています
 		DIRECTINPUT_VERSION,
@@ -43,7 +61,16 @@ void Input::Update()
 	keyboard->Acquire();
 
 	//全キーの入力状態を取得する
-	BYTE key[256] = {};
 	keyboard->GetDeviceState(sizeof(key), key);
 
+}
+
+bool Input::Pushkey(BYTE keyNumber)
+{
+	//指定キーをお押していればtrueを返す
+	if (key[keyNumber]) {
+		return true;
+	}
+	//そうでなければfalse
+	return false;
 }

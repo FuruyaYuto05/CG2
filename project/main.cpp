@@ -1155,9 +1155,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		} else {
 			
 
-			/*if (key[DIK_0]) {
+			if (input->Pushkey(DIK_0)) {
 				OutputDebugStringA("Hit 0\n");
-			}*/
+			}
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();

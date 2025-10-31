@@ -1,8 +1,6 @@
 #pragma once
 #define DIRECTINPUT_VERSION   0x0800
 #include <dinput.h>
-
-#include <dinput.h>
 #include <windows.h>
 #include <wrl.h>
 
@@ -13,20 +11,27 @@ public:
     //namespace省略
     template <class T> using Comptr = Microsoft::WRL::ComPtr<T>;
 
-public: // メンバ関数
+public: 
+    Input();  // コンストラクタの宣言
+    ~Input(); // デストラクタの宣言
+    
+    // メンバ関数
     // 初期化関数にHINSTANCEとHWNDを追加
     void Initialize(HINSTANCE hInstance, HWND hwnd);
     // 更新
     void Update();
 
+    bool Pushkey(BYTE keyNumber);
+
+
 private: // メンバ変数（外部から直接アクセスさせない）
     // DirectInputオブジェクト
-    IDirectInput8* directInput_ = nullptr;
+    IDirectInput8* directInput = nullptr;
 
     // キーボードデバイス
     IDirectInputDevice8* keyboard;
 
     // キーボードの現在の状態を保持する配列
-    // 256個のキーの状態（押されているか、離されているか）を格納します。
-    BYTE keyState_[256] = {};
+    // 256個のキーの状態
+    BYTE key[256] = {};
 };
