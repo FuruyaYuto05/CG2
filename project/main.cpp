@@ -826,12 +826,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 	input = new Input();
 	input->Initialize(hInstance,hwnd);
 
-	//入力の更新
-	input->Update();
-
-
-	//入力解放
-	delete input;
+	
 
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
@@ -1153,7 +1148,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else {
-			
+			//入力の更新  <= ❌ 初期化時に一度だけ呼ばれている
+			input->Update();
+
 
 			if (input->Pushkey(DIK_0)) {
 				OutputDebugStringA("Hit 0\n");
@@ -1305,6 +1302,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
+
+	delete input;
 
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
