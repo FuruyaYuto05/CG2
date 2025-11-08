@@ -27,7 +27,7 @@ Input::~Input()
 	}
 }
 
-void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
+void Input::Initialize(WinApp* winApp)
 {
 
 	// DirectInputオブジェクトの生成
@@ -49,9 +49,10 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 	result = keyboard->SetDataFormat(&c_dfDIKeyboard);
 	assert(SUCCEEDED(result));
 
-	result = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	result = keyboard->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 	
+	this->winApp = winApp;
 }
 
 void Input::Update()

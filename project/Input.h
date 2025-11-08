@@ -3,6 +3,7 @@
 #include <dinput.h>
 #include <windows.h>
 #include <wrl.h>
+#include "WinApp.h"
 
 class Input
 {
@@ -17,7 +18,7 @@ public:
     
     // メンバ関数
     // 初期化関数にHINSTANCEとHWNDを追加
-    void Initialize(HINSTANCE hInstance, HWND hwnd);
+    void Initialize(WinApp* winApp );
     // 更新
     void Update();
 
@@ -34,4 +35,6 @@ private: // メンバ変数（外部から直接アクセスさせない）
     // キーボードの現在の状態を保持する配列
     // 256個のキーの状態
     BYTE key[256] = {};
+
+    WinApp* winApp = nullptr;
 };
