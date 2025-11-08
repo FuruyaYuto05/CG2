@@ -1093,17 +1093,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[3] = 1; indexDataSprite[4] = 3; indexDataSprite[5] = 2;
 
 
-	MSG msg{};
+	
 	//ウィンドウの×ボタンが押されるまでループ
-	while (msg.message != WM_QUIT) {
-		CoInitializeEx(0, COINIT_MULTITHREADED);
+	while (true) {
 
-
-		//Windowにメッセージが来てたら最優先で処理させる
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		} else {
+		// 変更: WinApp::ProcessMessage() にメッセージ処理を任せる
+		// ProcessMessage() が true を返したら WM_QUIT が来たということ
+		if (winApp->ProcessMessage()) {
+			break; // ゲームループを抜ける
+		} 
+		{
 			//入力の更新  <= ❌ 初期化時に一度だけ呼ばれている
 			input->Update();
 
@@ -1313,7 +1312,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	delete winApp;
 	winApp = nullptr;
-
 
 	IDXGIDebug1* debug;
 	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
