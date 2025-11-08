@@ -18,6 +18,7 @@
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
+#include "WinApp.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -616,57 +617,12 @@ void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mip
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
+	WinApp* winApp = nullptr;
 
+	winApp = new WinApp();
+	winApp->Initialize();
 
-	WNDCLASS wc{};
-
-	//ウィンドウプロシージャ
-	wc.lpfnWndProc = WindowProc;
-	//ウィンドウクラス名(なんでもいい)
-	wc.lpszClassName = L"CG2WindowClass";
-	//インスタンスハンドル
-	wc.hInstance = GetModuleHandle(nullptr);
-	//カーソル
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-
-	//ウィンドウクラスを登録
-	RegisterClass(&wc);
-
-	//クライアント両雨域のサイズ
-	const int32_t kClientWidth = 1280;
-	const int32_t kClientHeight = 720;
-
-	//ウィンドウサイズを表す構造体にクライアント領域を入れる
-	RECT wrc = { 0,0,kClientWidth,kClientHeight };
-
-	//クライアント領域をもとに実際のサイズにwrcを変更してもらう
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	//ウィンドウの生成
-	HWND hwnd = CreateWindow(
-		wc.lpszClassName,
-		L"CG2",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		wrc.right - wrc.left,
-		wrc.bottom - wrc.top,
-		nullptr,
-		nullptr,
-		wc.hInstance,
-		nullptr);
-
-#ifdef _DEBUG
-	ID3D12Debug1* debugController = nullptr;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-		debugController->EnableDebugLayer();
-		debugController->SetEnableGPUBasedValidation(TRUE);
-	}
-
-#endif // _DEBUG
-
-	//ウィンドウを表示する
-	ShowWindow(hwnd, SW_SHOW);
+	delete winApp;
 
 	//DXGIファクトリーの作成
 	IDXGIFactory7* dxgiFactory = nullptr;
