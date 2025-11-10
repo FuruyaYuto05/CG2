@@ -1,4 +1,7 @@
-﻿  main.cpp
+﻿  Input.cpp
+  WinApp.cpp
+  main.cpp
+  LINK : 前回のインクリメンタル リンクで C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\project\..\generated\outputs\Debug\CG2.exe が見つからなかったか、ビルドされませんでした。フル リンクを行います。
   CG2.vcxproj -> C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\generated\outputs\Debug\CG2.exe
           1 個のファイルをコピーしました。
           1 個のファイルをコピーしました。
