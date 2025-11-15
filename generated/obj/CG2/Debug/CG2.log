@@ -1,7 +1,8 @@
-﻿  Input.cpp
-  WinApp.cpp
+﻿  DirectXCommon.cpp
   main.cpp
-  LINK : 前回のインクリメンタル リンクで C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\project\..\generated\outputs\Debug\CG2.exe が見つからなかったか、ビルドされませんでした。フル リンクを行います。
-  CG2.vcxproj -> C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\generated\outputs\Debug\CG2.exe
-          1 個のファイルをコピーしました。
-          1 個のファイルをコピーしました。
+C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\project\main.cpp(629,12): error C2660: 'DirectXCommon::Initialize': 関数に 0 個の引数を指定できません。
+      C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\project\DirectXCommon.h(19,7):
+      'DirectXCommon::Initialize' の宣言を確認してください
+      C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\project\main.cpp(629,12):
+      引数リスト '()' を一致させようとしているとき
+  

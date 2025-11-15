@@ -19,6 +19,7 @@
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "WinApp.h"
+#include "DirectXCommon.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -622,6 +623,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	winApp = new WinApp();
 	winApp->Initialize();
 
+	DirectXCommon* dxCommon = nullptr;
+
+	dxCommon = new DirectXCommon();
+	dxCommon->Initialize();
 	
 
 	//DXGIファクトリーの作成
@@ -1259,7 +1264,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	delete input;
-
+	delete dxCommon;
 
 	
 
