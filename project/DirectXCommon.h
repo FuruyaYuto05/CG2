@@ -7,7 +7,9 @@
 #include <dxcapi.h>
 #include <Windows.h>      // HANDLE用
 #include <cstdint>
+#include <string>
 #include "WinApp.h"
+#include "externals/DirectXTex/DirectXTex.h"
 
 // ComPtrのために名前空間を省略せず記述するために、ここでは using namespace は使わない
 
@@ -15,6 +17,29 @@ class DirectXCommon
 {
 public:
 	void Initialize(WinApp* winApp);
+
+	ID3D12Device* GetDevice() const { return device_.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList_.Get(); }
+
+	/// <summary>
+	/// バッファリソースの生成
+	/// </summary>
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
+
+	/// <summary>
+	/// テクスチャリソースの生成
+	/// </summary>
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
+	
+	/// <summary>
+	/// テクスチャファイルの読み込み
+	/// </summary>
+	DirectX::ScratchImage LoadTexture(const std::string& filePath);
+
+	// --- シェーダーコンパイル関数を追加 ---
+	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
+		const std::wstring& filePath,
+		const wchar_t* profile);
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
 		D3D12_DESCRIPTOR_HEAP_TYPE heapType,
@@ -47,6 +72,14 @@ public:
 private:
 
 	WinApp* winApp_ = nullptr;
+
+	// --- リソース転送関数を追加 ---
+	/// <summary>
+	/// テクスチャデータの転送
+	/// </summary>
+	void UploadTextureData(
+		Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
+		const DirectX::ScratchImage& mipImages);
 
 	// --- DirectX 基盤オブジェクト (ComPtr へ変更) ---
 	

@@ -1,3 +1,4 @@
 ﻿  main.cpp
-main.obj : error LNK2005: "struct ID3D12Resource * __cdecl CreateDepthStencilTextureResource(struct ID3D12Device *,int,int)" (?CreateDepthStencilTextureResource@@YAPEAUID3D12Resource@@PEAUID3D12Device@@HH@Z) は既に DirectXCommon.obj で定義されています。
-C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\project\..\generated\outputs\Debug\CG2.exe : fatal error LNK1169: 1 つ以上の複数回定義されているシンボルが見つかりました。
+  CG2.vcxproj -> C:\Users\k024g\OneDrive\デスクトップ\2025\CG2\CG2\generated\outputs\Debug\CG2.exe
+          1 個のファイルをコピーしました。
+          1 個のファイルをコピーしました。
