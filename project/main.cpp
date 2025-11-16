@@ -1038,16 +1038,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
-	//DirectX::ScratchImage mipImages = LoadTexture(modelData.material.textureFilePath);
+	DirectX::ScratchImage mipImages = LoadTexture(modelData.material.textureFilePath);
 	//const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	//ID3D12Resource* textureResource = CreateTextureResource(device, metadata);
+	ComPtr<ID3D12Resource> textureResource = dxCommon->CreateTextureResource(mipImages.GetMetadata());
+
 	//UploadTextureData(textureResource, mipImages);
+	dxCommon->UploadTextureData(textureResource, mipImages);
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	//srvDesc.Format = metadata.format;
+	srvDesc.Format = mipImages.GetMetadata().format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	//srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
+	srvDesc.Texture2D.MipLevels = UINT(mipImages.GetMetadata().mipLevels);
 
 	//D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	//D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
@@ -1056,6 +1061,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	//device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
+	dxCommon->GetDevice()->CreateShaderResourceView(
+		textureResource.Get(), // ComPtrなので .Get()
+		&srvDesc,
+		dxCommon->GetSRVCPUDescriptorHandle(0) // 0番目のSRVヒープスロットを使用すると仮定
+	);
 
 	/*ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
 	ID3D12DescriptorHeap* dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
@@ -1215,8 +1225,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//commandList->RSSetScissorRects(1, &scissorRect);
 			dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature);
 			//commandList->SetPipelineState(graphicsPipelineState);
+			dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState);
 			dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 			//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			dxCommon->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			////マテリアルCBufferの場所を設定
 			//commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
@@ -1226,8 +1238,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			////srv用のCBufferの場所を設定
 			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
+			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); // Material CBV
+			dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress()); // WVP CBV
+			dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, dxCommon->GetSRVGPUDescriptorHandle(0)); // SRV (Texture) Binding
+
 			//commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-			////commandList->DrawInstanced(6, 1, 0, 0);
+			//commandList->DrawInstanced(6, 1, 0, 0);
+
+			dxCommon->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
 			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 

@@ -36,6 +36,14 @@ public:
 	/// </summary>
 	DirectX::ScratchImage LoadTexture(const std::string& filePath);
 
+	// --- リソース転送関数を追加 ---
+/// <summary>
+/// テクスチャデータの転送
+/// </summary>
+	void UploadTextureData(
+		Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
+		const DirectX::ScratchImage& mipImages);
+
 	// --- シェーダーコンパイル関数を追加 ---
 	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 		const std::wstring& filePath,
@@ -73,13 +81,7 @@ private:
 
 	WinApp* winApp_ = nullptr;
 
-	// --- リソース転送関数を追加 ---
-	/// <summary>
-	/// テクスチャデータの転送
-	/// </summary>
-	void UploadTextureData(
-		Microsoft::WRL::ComPtr<ID3D12Resource>& texture,
-		const DirectX::ScratchImage& mipImages);
+
 
 	// --- DirectX 基盤オブジェクト (ComPtr へ変更) ---
 	
