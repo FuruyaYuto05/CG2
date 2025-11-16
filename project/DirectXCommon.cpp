@@ -16,6 +16,7 @@
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
+#include <thread>
 
 using namespace Microsoft::WRL;
 
@@ -331,6 +332,8 @@ void DirectXCommon::InitializeDevice()
 #endif // _DEBUG
 }
 
+
+
 void DirectXCommon::InitializeCommand()
 {
 
@@ -526,10 +529,50 @@ void DirectXCommon::InitializeDXC()
 	assert(SUCCEEDED(hr));
 }
 
+void DirectXCommon::InitializeFixFPS()
+{
+	// 現在時間を記録する
+	reference_ = std::chrono::steady_clock::now();
+}
+
+// 1/60秒ぴったりの時間
+const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
+// 1/60秒よりわずかに短い時間を表す定数
+const std::chrono::microseconds kMinCheckTime(uint64_t(1000000.0f / 65.0f));
+
+void DirectXCommon::UpdateFixFPS()
+{
+	// 1/60秒ぴったりの時間
+	// const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f)); // 👈 グローバルに移動済み
+
+	// 記録時間から現在までの時間を取得
+	const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	// 経過時間をマイクロ秒で取得
+	const std::chrono::microseconds elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
+
+	// 経過時間が短すぎた場合は、その差分だけスリープする
+	// kMinTime を使用
+	if (elapsed < kMinTime) {
+		// 待機が必要な時間を計算
+		const std::chrono::microseconds sleepTime = kMinTime - elapsed;
+
+		// 待機 (マイクロ秒単位でのスリープ)
+		std::this_thread::sleep_for(sleepTime);
+	}
+
+	// 次のフレームのための基準時間を更新
+	reference_ = std::chrono::steady_clock::now();
+
+
+}
+
 void DirectXCommon::Initialize(WinApp* winApp)
 {
 	assert(winApp);
 	this->winApp_ = winApp;
+
+	// FPS固定初期化
+	InitializeFixFPS();
 
 	// デバイスの生成、コマンド関連の生成、スワップチェーンの生成を
 	// 機能ごとに分割して呼び出す
@@ -657,6 +700,9 @@ void DirectXCommon::PostDraw()
 		assert(SUCCEEDED(hr));
 		WaitForSingleObject(fenceEvent_, INFINITE);
 	}
+
+	// FPS固定
+	UpdateFixFPS();
 
 	// ❌ コマンドアロケータとコマンドリストのリセットは PostDraw に含めず、
 	// 描画開始時 (PreDraw) で行うのが一般的であるため、ここでは含めません。

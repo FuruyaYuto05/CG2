@@ -10,6 +10,7 @@
 #include <string>
 #include "WinApp.h"
 #include "externals/DirectXTex/DirectXTex.h"
+#include <chrono>
 
 // ComPtrのために名前空間を省略せず記述するために、ここでは using namespace は使わない
 
@@ -120,6 +121,9 @@ private:
 	uint32_t srvDescriptorSize_ = 0; // 
 	uint32_t dsvDescriptorSize_ = 0; // 
 
+	// --- FPS固定用の変数 ---
+	std::chrono::steady_clock::time_point reference_;
+
 	D3D12_VIEWPORT viewport_;
 	D3D12_RECT scissorRect_;
 
@@ -139,5 +143,9 @@ private:
 	void InitializeDXC();         // DXCコンパイラの初期化
 	void InitializeImGui();       // ImGuiのDirectX部分の初期化
 
+
+	void InitializeFixFPS();
+	// FPS固定更新
+	void UpdateFixFPS();
 
 };
