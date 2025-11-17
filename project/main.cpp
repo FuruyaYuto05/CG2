@@ -21,6 +21,8 @@
 #include "WinApp.h"
 #include "DirectXCommon.h"
 #include <wrl.h>
+#include "SpriteCommon.h"
+#include "Sprite.h"
 
 using namespace Microsoft::WRL;
 
@@ -632,6 +634,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon = new DirectXCommon(); 
 	dxCommon->Initialize(winApp);        
 
+
+	SpriteCommon* spriteCommon = nullptr;
+	//スプライト共通部の初期化
+	spriteCommon = new SpriteCommon;
+	spriteCommon->Initialize();
+
 	////DXGIファクトリーの作成
 	IDXGIFactory7* dxgiFactory = nullptr;
 	////HRESULTはWindows刑のエラーコードであり、
@@ -1125,6 +1133,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	
+	Sprite* sprite = new Sprite();
+	// Initialize()に SpriteCommon などの必要な情報を渡す想定
+	sprite->Initialize();
+	
 	//ウィンドウの×ボタンが押されるまでループ
 	while (true) {
 
@@ -1299,6 +1311,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
+	delete sprite;
 
 	delete input;
 
@@ -1348,6 +1361,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//useAdapter->Release();
 	//dxgiFactory->Release();
 
+	delete spriteCommon;
 
 	//windowsAPIの終了処理
 	winApp->Finalize();
