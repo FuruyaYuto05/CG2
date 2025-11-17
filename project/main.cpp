@@ -638,7 +638,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SpriteCommon* spriteCommon = nullptr;
 	//スプライト共通部の初期化
 	spriteCommon = new SpriteCommon;
-	spriteCommon->Initialize();
+	spriteCommon->Initialize(dxCommon);
 
 	////DXGIファクトリーの作成
 	IDXGIFactory7* dxgiFactory = nullptr;
@@ -1265,7 +1265,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
-
+			spriteCommon->SetCommonDrawSettings(dxCommon->GetCommandList());
 
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
 
