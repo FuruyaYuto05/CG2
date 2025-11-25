@@ -426,7 +426,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				}
 				//要素へのIndexから、実際の要素の値を取得して、頂点を構築する
 				Vector4 position = positions[elementIndices[0] - 1];
-				position.x *= -1.0f;
+				//position.x *= -1.0f;
 
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				texcoord.y = 1.0f - texcoord.y;

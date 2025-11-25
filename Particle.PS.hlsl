@@ -1,10 +1,12 @@
 #include "Particle.hlsli"
 
-
 struct Material
 {
     float32_t4 color;
+    int32_t enableLighting;
+    float32_t3x3 uvTransform;
 };
+
 ConstantBuffer<Material> gMaterial : register(b0);
 Texture2D<float32_t4> gTexture : register(t0);
 SamplerState gSampler : register(s0);
@@ -17,18 +19,14 @@ struct PixelShaderOutput
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
-    
-    float32_t4 transformedUV = null(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float32_t4 textureColor = gTexture.Sample(gSampler, input.texcoord);
-    
     output.color = gMaterial.color * textureColor;
- 
+    
+    //textureのα値が0のときにPixelを破棄
     if (textureColor.a == 0.0)
     {
-        discard; // ピクセルを破棄し、後続の処理（深度書き込み、色合成など）を行わない
+        discard;
     }
-    
- 
     
     return output;
 }
