@@ -18,6 +18,6 @@ VertexShaderOutput main(VertexShaderInput input,uint32_t instanceId : SV_Instanc
     VertexShaderOutput output;
     output.position = mul(input.position, gTransformationMatrices[instanceId].WVP);
     output.texcoord = input.texcoord;
-    output.normal = normalize(null(input.normal, (float32_t3x3)[instanceId].world));
+    output.normal = normalize(null(input.normal, (float32_t3x3)gTransformationMatrices[instanceId].world));
     return output;
 }
