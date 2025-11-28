@@ -86,19 +86,12 @@ struct Material
 
 enum BlendMode
 {
-	//ブレンドなし
 	kBlendModeNone,
-	//通常αブレンド。デフォルト。Src * SrcA + Dest * (1 - SrcA)
 	kBlendModeNormal,
-	//加算。Src * SrcA + Dest * 1
 	kBlendModeAdd,
-	//減算。Dest * 1 - Src * SrcA
 	kBlendModeSubtract,
-	//乗算。Src * 0 + Dest * Src
 	kBlendModeMultily,
-	//スクリーン。Src * 0 + Desc * Src
 	kBlendModeScreen,
-	//利用してはいけない
 	kCountOfBlendMode,
 };
 
@@ -675,8 +668,6 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
 	return vertexResouce;
 }
 
-
-
 ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
 {
 	ID3D12DescriptorHeap* descriptorHeap = nullptr;
@@ -723,7 +714,6 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 	assert(SUCCEEDED(hr));
 
 	return resource;
-
 }
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -735,7 +725,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ウィンドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
 	//ウィンドウクラス名(なんでもいい)
-	wc.lpszClassName = L"CG2WindowClass";
+	wc.lpszClassName = L"LE2C_24_フルヤ_ユウト";
 	//インスタンスハンドル
 	wc.hInstance = GetModuleHandle(nullptr);
 	//カーソル
@@ -757,7 +747,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ウィンドウの生成
 	HWND hwnd = CreateWindow(
 		wc.lpszClassName,
-		L"CG2",
+		L"LE2C_24_フルヤ_ユウト",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -829,8 +819,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
 
 		//infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-
-
 		//抑制するメッセージのID
 		D3D12_MESSAGE_ID denyIds[] = {
 			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
@@ -846,14 +834,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		infoQueue->Release();
 	}
 
-
-
 #endif // _DEBUG
-
-
-
-
-
 
 	//コマンドキューの生成
 	ID3D12CommandQueue* commandQueue = nullptr;
@@ -1294,7 +1275,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//インスタンシング
 	const uint32_t kNumInstance = 10;
-	////Instancing用のTransformationMatrixリソースを作る
+	//Instancing用のTransformationMatrixリソースを作る
 	//Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource = CreateBufferResource(device, sizeof(TransformationMatrix) * kNumInstance);
 
 	//Instancing用のTransformationMatrixリソースを作る
@@ -1361,9 +1342,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::NewFrame();
 
 
-			//transform.rotate.y += 0.03f;
-			/*Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-			*wvpData = worldMatrix;*/
+			
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
@@ -1453,7 +1432,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			////インデックスを指定
 			//commandList->IASetIndexBuffer(&indexBufferViewSprite);//IBVを設定
 
-			////描画！(DrawCall/ドローコール)6個のインデックスを使用し1つのインスタンスを描画。その他当面0で良い
 			//commandList->DrawIndexedInstanced(6, 1, 0, 0,0);
 
 
