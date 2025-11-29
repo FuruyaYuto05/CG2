@@ -23,7 +23,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include<sstream>
 #include<numbers>
 #include "externals/DirectXTex/d3dx12.h"
-
+#include <random>
 struct Matrix3x3
 {
 	float m[3][3];
