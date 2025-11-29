@@ -15,6 +15,11 @@ public:
     // [FIX] SpriteCommon* を引数として受け取る
     void Initialize(SpriteCommon* spriteCommon);
 
+    void Update();
+
+    // [確認] 描画処理メソッド
+    void Draw(ID3D12GraphicsCommandList* commandList);
+
 private:
     //SpriteCommon のポインタをメンバ変数として保持
     SpriteCommon* spriteCommon_ = nullptr; // nullptrlで初期化
@@ -41,4 +46,50 @@ private:
     D3D12_INDEX_BUFFER_VIEW indexBufferView_;
 
     void CreateVertexData();
+
+
+    // [NEW] マテリアルデータ
+    struct Material {
+        Math::Vector4 color;             // 色情報 (Vector4)
+        int32_t enableLighting;          // ライティング有効/無効フラグ (int32_t)
+        float padding[3];                // パディング (float[3])
+        Math::Matrix4x4 uvTransform;     // UV変換行列 (Matrix4x4)
+    };
+
+    // [NEW] マテリアル (メンバ変数)
+
+    // バッファリソース (ConstantBuffer)
+    Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+
+    // バッファリソース内のデータを指すポインタ
+    Material* materialData_ = nullptr;
+
+
+    // [NEW] マテリアルデータとバッファの生成を担うプライベートメソッド
+    void CreateMaterial();
+
+
+
+    // [NEW] 座標変換行列データ
+    struct TransformationMatrix {
+        Math::Matrix4x4 WVP;    // World View Projection Matrix
+        Math::Matrix4x4 World;  // World Matrix
+    };
+
+    // [確認] 座標変換行列 (メンバ変数)
+
+    // バッファリソース (ConstantBuffer)
+    Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource_;
+
+    // バッファリソース内のデータを指すポインタ
+    TransformationMatrix* transformationMatrixData_ = nullptr;
+
+    // トランスフォーム情報
+    Math::Transform transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
+    // [NEW] 座標変換行列とバッファの生成を担うプライベートメソッド
+    void CreateTransformationMatrix();
+
+    // [NEW] 行列更新処理をカプセル化するためのプライベートメソッド
+    void UpdateTransformationMatrix();
 };

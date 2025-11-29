@@ -3,6 +3,7 @@
 #include "SpriteCommon.h" 
 #include <cassert> // (ポインタチェックのために追加)
 #include "Math.h"
+#include "WinApp.h" // [FIX] WinApp::kClientWidth/Height を参照するために追加
 #include <algorithm>
 
 
@@ -17,6 +18,12 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
     assert(this->spriteCommon_ != nullptr);
 
     CreateVertexData();
+
+    // [NEW] マテリアルデータ作成関数を呼び出す
+    CreateMaterial();
+
+    // [NEW] 座標変換行列作成関数を呼び出す
+    CreateTransformationMatrix();
 
     // TODO: 今後、ここにリソース生成のロジックを実装していく
 }
@@ -79,4 +86,123 @@ void Sprite::CreateVertexData() {
     indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
     indexBufferView_.SizeInBytes = sizeof(uint32_t) * kIndexCount;
     indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
+}
+
+// =============================================================
+// [NEW] マテリアルデータとバッファの生成
+// =============================================================
+void Sprite::CreateMaterial() {
+    // ID3D12Device* device = spriteCommon_->GetDxCommon()->GetDevice(); // デバイスはリソース作成関数内で使用されるため省略
+
+    // --- 1. マテリアルリソースを作る (ConstantBuffer) ---
+    // Sprite::Material構造体のサイズでリソースを作成
+    materialResource_ = spriteCommon_->GetDxCommon()->CreateBufferResource(sizeof(Material));
+
+    // --- 2. マテリアルリソースにデータを書き込むためのアドレスを取得 ---
+    materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+
+    // --- 3. マテリアルデータの初期値を書き込む (スライドの指示) ---
+    materialData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    materialData_->enableLighting = false; // false = 0
+    // paddingはDxCommonで適切なサイズになるよう調整されるため、ここでは省略
+    materialData_->uvTransform = Math::MakeIdentity4x4();
+}
+
+// =============================================================
+// [NEW] 座標変換行列とバッファの生成
+// =============================================================
+void Sprite::CreateTransformationMatrix() {
+
+    // --- 1. 座標変換行列リソースを作る (ConstantBuffer) ---
+    // Sprite::TransformationMatrix構造体のサイズでリソースを作成
+    transformationMatrixResource_ = spriteCommon_->GetDxCommon()->CreateBufferResource(sizeof(TransformationMatrix));
+
+    // --- 2. リソースにデータを書き込むためのアドレスを取得 ---
+    transformationMatrixResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData_));
+
+    // --- 3. 単位行列を書き込む (スライドの指示) ---
+    transformationMatrixData_->WVP = Math::MakeIdentity4x4();
+    transformationMatrixData_->World = Math::MakeIdentity4x4();
+}
+
+
+// =============================================================
+// [NEW] 座標変換行列の更新
+// =============================================================
+void Sprite::UpdateTransformationMatrix() {
+    // TransformからWorldMatrixを作る
+    // transform_ は Sprite::h で {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} で初期化済み
+    Math::Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+
+    // ViewMatrixを作って単位行列を代入 (2Dカメラは通常単位行列)
+    Math::Matrix4x4 viewMatrix = Math::MakeIdentity4x4();
+
+    // ProjectionMatrixを作って平行投影行列を書き込む
+    // WinApp::kClientWidth/Height は、メインループからアクセス可能な定数である前提
+    // WinApp.hをSprite.cppでインクルードして、定数を参照する必要があります。
+    Math::Matrix4x4 projectionMatrix = Math::MakeOrthorgraphicMatrix(
+        0.0f,
+        (float)WinApp::kClientHeight, // 画面サイズが上下反転している場合は、この値に注意
+        (float)WinApp::kClientWidth,
+        0.0f,
+        0.0f,
+        100.0f
+    );
+
+    // WVP = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+    Math::Matrix4x4 worldViewProjectionMatrix = Math::Multiply(worldMatrix, Math::Multiply(viewMatrix, projectionMatrix));
+
+    // transformationMatrixData_->WVP に書き込む
+    transformationMatrixData_->WVP = worldViewProjectionMatrix;
+
+    // transformationMatrixData_->World に書き込む
+    transformationMatrixData_->World = worldMatrix;
+
+    // TODO: 頂点データ更新 (UpdateVertexData) を行う場合は、この関数内で transform_ を使用して頂点データを変更します。
+}
+
+void Sprite::Update() {
+    // 頂点リソースにデータを書き込む (4点分) / インデックスリソースにデータを書き込む (6個分)
+    // -> 現状、頂点/インデックスデータは固定のため、Update()では省略。
+    //    位置やサイズが変わる場合に、UpdateVertexData()を呼び出します。
+
+    // 行列更新処理を呼び出す
+    UpdateTransformationMatrix();
+
+    // TODO: 必要に応じて、マテリアルの色やUV情報などを更新するロジックを追加
+}
+
+// =============================================================
+// [NEW] 描画処理 (Draw)
+// =============================================================
+void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
+
+    // 1. VertexBufferView を設定
+    commandList->IASetVertexBuffers(0, 1, &vertexBufferView_);
+
+    // 2. IndexBufferView を設定
+    commandList->IASetIndexBuffer(&indexBufferView_);
+
+    // 3. マテリアル CBuffer の場所を設定 (RootParameter[0])
+    commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+
+    // 4. 座標変換行列 CBuffer の場所を設定 (RootParameter[1])
+    commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResource_->GetGPUVirtualAddress());
+
+    // 5. SRV の Descriptor Table の先頭を設定 (RootParameter[2])
+    // ※ SpriteCommon が持つ Descriptor Heap の先頭から、このスプライトのテクスチャハンドルを取得する必要があります。
+    //    ここでは、仮に0番目のスロット（テクスチャ）を使用していると仮定し、SpriteCommonからヒープハンドルを取得します。
+    //    (実装によっては、この SRV 設定は SpriteCommon::PreDraw に含まれることもありますが、ここでは Draw で個別に行います)
+    //    ⇒ 正確には、SRVのヒープ自体は SetCommonDrawSettings でセット済みなので、ここでは個別の SRV のハンドルを設定します。
+    // commandList->SetGraphicsRootDescriptorTable(2, spriteCommon_->GetSRVGPUDescriptorHandle(0)); // GetSRVGPUDescriptorHandle は仮のメソッド
+
+    commandList->SetGraphicsRootDescriptorTable(2, spriteCommon_->GetDxCommon()->GetSRVGPUDescriptorHandle(0));
+
+    // ToDo: SRVハンドルの取得ロジックが必要だが、今回は main.cpp の描画コマンドをそのまま移植し、
+    //      テクスチャアトラスを考慮しない暫定的なコードとする。
+    //      main.cpp で使われていた D3D12_GPU_DESCRIPTOR_HANDLE を直接参照できないため、一旦この行は保留し、DrawCallに進みます。
+
+    // 6. 描画! (DrawCall)
+    // インデックス数 6, インスタンス数 1 で描画
+    commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
