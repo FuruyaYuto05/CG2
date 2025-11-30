@@ -1139,6 +1139,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[3] = 1; indexDataSprite[4] = 3; indexDataSprite[5] = 2;
 
 
+	//std::vector<std::string> texFiles = {
+	//"resources/uvChecker.png",
+	//"resources/checker2.png",
+	//"resources/checker3.png",
+	//"resources/checker4.png",
+	//"resources/checker5.png"
+	//};
+
+	//std::vector<Sprite*> sprites;
+
+	//for (uint32_t i = 0; i < 5; ++i) {
+	//	Sprite* sprite = new Sprite();
+	//	sprite->Initialize(spriteCommon, texFiles[i]);  // ←個別の画像を指定！
+	//	float x_position = 100.0f + 150.0f * i;
+	//	sprite->SetPosition({ x_position, 100.0f });
+	//	sprites.push_back(sprite);
+	//}
+
 
 	std::vector<Sprite*> sprites;
 	for (uint32_t i = 0; i < 5; ++i) {
