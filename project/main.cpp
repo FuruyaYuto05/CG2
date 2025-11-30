@@ -24,6 +24,7 @@
 #include "SpriteCommon.h"
 #include "Sprite.h"
 #include "Math.h"
+#include "TextureManager.h"
 
 using namespace Microsoft::WRL;
 
@@ -635,6 +636,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon = new DirectXCommon(); 
 	dxCommon->Initialize(winApp);        
 
+	TextureManager::GetInstance()->SetDirectXCommon(dxCommon);
+
+	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
+
+	TextureManager::GetInstance()->Initialize();
 
 	SpriteCommon* spriteCommon = nullptr;
 	//スプライト共通部の初期化
@@ -1132,10 +1138,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[0] = 0; indexDataSprite[1] = 1; indexDataSprite[2] = 2;
 	indexDataSprite[3] = 1; indexDataSprite[4] = 3; indexDataSprite[5] = 2;
 
+
+
 	std::vector<Sprite*> sprites;
 	for (uint32_t i = 0; i < 5; ++i) {
 		Sprite* sprite = new Sprite();
-		sprite->Initialize(spriteCommon);
+		sprite->Initialize(spriteCommon, "resources/uvChecker.png");
 		float x_position = 100.0f + 150.0f * i;
 		sprite->SetPosition({ x_position, 100.0f });
 		sprites.push_back(sprite);
@@ -1144,7 +1152,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Sprite* sprite = new Sprite();
 	// Initialize()に SpriteCommon などの必要な情報を渡す想定
-	sprite->Initialize(spriteCommon);
+	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
 	
 
 
@@ -1449,6 +1457,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//windowsAPIの終了処理
 	winApp->Finalize();
+
+	TextureManager::GetInstance()->Finalize();
 
 	delete dxCommon;
 
