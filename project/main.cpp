@@ -1046,22 +1046,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//	srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 
-	//DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
 	//DirectX::ScratchImage mipImages = LoadTexture(modelData.material.textureFilePath);
 	//const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	//ID3D12Resource* textureResource = CreateTextureResource(device, metadata);
-	//ComPtr<ID3D12Resource> textureResource = dxCommon->CreateTextureResource(mipImages.GetMetadata());
+	ComPtr<ID3D12Resource> textureResource = dxCommon->CreateTextureResource(mipImages.GetMetadata());
 
 	//UploadTextureData(textureResource, mipImages);
-	//dxCommon->UploadTextureData(textureResource, mipImages);
+	dxCommon->UploadTextureData(textureResource, mipImages);
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	//srvDesc.Format = metadata.format;
-	//srvDesc.Format = mipImages.GetMetadata().format;
+	srvDesc.Format = mipImages.GetMetadata().format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	//srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
-	//srvDesc.Texture2D.MipLevels = UINT(mipImages.GetMetadata().mipLevels);
+	srvDesc.Texture2D.MipLevels = UINT(mipImages.GetMetadata().mipLevels);
 
 	//D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	//D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
@@ -1070,11 +1070,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	//device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
-	//dxCommon->GetDevice()->CreateShaderResourceView(
-	//	textureResource.Get(), // ComPtrなので .Get()
-	//	&srvDesc,
-	//	dxCommon->GetSRVCPUDescriptorHandle(0) // 0番目のSRVヒープスロットを使用すると仮定
-	//);
+	dxCommon->GetDevice()->CreateShaderResourceView(
+		textureResource.Get(), // ComPtrなので .Get()
+		&srvDesc,
+		dxCommon->GetSRVCPUDescriptorHandle(0) // 0番目のSRVヒープスロットを使用すると仮定
+	);
 
 	/*ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
 	ID3D12DescriptorHeap* dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
@@ -1122,22 +1122,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ID3D12Resource* indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
 	ComPtr<ID3D12Resource> indexResourceSprite = dxCommon->CreateBufferResource(sizeof(uint32_t) * 6);
 
-	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
+	//D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
 	//indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
-	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
-	indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
+	//indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
+	//indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
 
 	uint32_t* indexDataSprite = nullptr;
 	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
 	indexDataSprite[0] = 0; indexDataSprite[1] = 1; indexDataSprite[2] = 2;
 	indexDataSprite[3] = 1; indexDataSprite[4] = 3; indexDataSprite[5] = 2;
 
-
+	std::vector<Sprite*> sprites;
+	for (uint32_t i = 0; i < 5; ++i) {
+		Sprite* sprite = new Sprite();
+		sprite->Initialize(spriteCommon);
+		float x_position = 100.0f + 150.0f * i;
+		sprite->SetPosition({ x_position, 100.0f });
+		sprites.push_back(sprite);
+	}
 	
+
 	Sprite* sprite = new Sprite();
 	// Initialize()に SpriteCommon などの必要な情報を渡す想定
 	sprite->Initialize(spriteCommon);
 	
+
+
 	//ウィンドウの×ボタンが押されるまでループ
 	while (true) {
 
@@ -1156,7 +1166,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 			// [NEW] Sprite::Update() を呼び出す
-			sprite->Update();
+			//sprite->Update();
+
+			// スプライトの更新
+            // vector の要素を一つずつ取り出す
+			for (Sprite* sprite : sprites) {
+
+				// 例: 特定のスプライトのみを動かす、または共通のロジック
+				// sprite->SetRotation(sprite->GetRotation() + 0.01f);
+
+				// 座標変換行列の再計算
+				sprite->Update();
+			}
+
 
 			/*Matrix4x4 worldMatrixSprite = Math::MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			Matrix4x4 viewMatrixSprite = Math::MakeIdentity4x4();
@@ -1179,6 +1201,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//*wvpData = worldMatrix;
 
 
+
 			//開発用UIの処理
 			ImGui::ShowDemoWindow();
 
@@ -1192,7 +1215,41 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat3("Sprite rotate.y", &transformSprite.rotate.x, 0.1f);
 			//ImGui::DragFloat3("Sprite transform", &transformSprite.translate.x, 1.1f);
 			//ImGui::DragFloat3("Sprite scale", &transformSprite.scale.x, 0.1f);
+			
+			// 1. 現在の位置を取得
+			Math::Vector2 currentPos = sprite->GetPosition();
+			Math::Vector3 currentRot = sprite->GetRotation();
+			
+			Math::Vector2 currentSize = sprite->GetSize();
 
+			// 2. DragFloat2 で編集（ここでは Vector3ではなく Vector2 が適切）
+			// ImGui::DragFloat2 を使って位置を編集します。
+			if (ImGui::DragFloat2("Position", &currentPos.x, 1.0f))
+			{
+				// 3. 編集された値を Setter で設定
+				sprite->SetPosition(currentPos);
+			}
+
+
+			// --- Rotation (Vector3) ---
+			if (ImGui::DragFloat3("Rotation", &currentRot.x, 0.01f)) {
+				// [FIX] Vector3 の変数を Setter に渡す
+				sprite->SetRotation(currentRot);
+			}
+
+			// [NEW] Color の Getter/Setter を使った ImGui ウィジェットを追加
+			Math::Vector4 currentColor = sprite->GetColor();
+
+			// DragFloat4 ではなく ColorEdit4 を使うことで、カラーピッカーが表示される
+			if (ImGui::ColorEdit4("Color", &currentColor.x, ImGuiColorEditFlags_AlphaPreview)) {
+				// 編集された値を Setter で設定
+				sprite->SetColor(currentColor);
+			}
+
+			if (ImGui::DragFloat2("Size", &currentSize.x, 0.1f, 0.1f, 1000.0f)) // 1.0f 単位で、最小 1.0f までの制限
+			{
+				sprite->SetSize(currentSize);
+			}
 
 			ImGui::End();
 
@@ -1270,7 +1327,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			spriteCommon->SetCommonDrawSettings(dxCommon->GetCommandList());
 
 			// [NEW] Sprite::Draw() を呼び出し、個別の描画コマンドを積む
-			sprite->Draw(dxCommon->GetCommandList());
+			//sprite->Draw(dxCommon->GetCommandList());
+
+			// 2. 個別スプライトの描画
+            // vector の要素を一つずつ取り出し、Drawを呼び出す
+			for (Sprite* sprite : sprites) {
+				sprite->Draw(dxCommon->GetCommandList());
+			}
+
 
 			//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 
@@ -1374,7 +1438,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//useAdapter->Release();
 	//dxgiFactory->Release();
 
-	delete spriteCommon;
+	//delete spriteCommon;
+
+	// スプライトの解放
+	for (Sprite* sprite : sprites) {
+		if (sprite) {
+			delete sprite; // newしたオブジェクトを解放
+		}
+	}
 
 	//windowsAPIの終了処理
 	winApp->Finalize();

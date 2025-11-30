@@ -20,6 +20,64 @@ public:
     // [確認] 描画処理メソッド
     void Draw(ID3D12GraphicsCommandList* commandList);
 
+
+    // [NEW] 座標の Getter と Setter を追加
+
+    /// <summary>
+    /// 座標のGetter
+    /// </summary>
+    const Math::Vector2& GetPosition() const { return position_; }
+
+    /// <summary>
+    /// 座標のSetter
+    /// </summary>
+    void SetPosition(const Math::Vector2& position) { this->position_ = position; }
+
+    // --- スケール (Scale) の Setter/Getter ---
+/// <summary>
+/// スケールのGetter
+/// </summary>
+    const Math::Vector3& GetScale() const { return transform_.scale; }
+
+    /// <summary>
+    /// スケールのSetter
+    /// </summary>
+    void SetScale(const Math::Vector3& scale) { this->transform_.scale = scale; }
+
+
+    // --- 回転角 (Rotate) の Setter/Getter ---
+    /// <summary>
+    /// 回転角のGetter
+    /// </summary>
+    const Math::Vector3& GetRotation() const { return transform_.rotate; }
+
+    /// <summary>
+    /// 回転角のSetter
+    /// </summary>
+    void SetRotation(const Math::Vector3& rotate) { this->transform_.rotate = rotate; }
+
+    // [NEW] 色 (Color) の Setter/Getter を追加
+/// <summary>
+/// 色のGetter
+/// </summary>
+    const Math::Vector4& GetColor() const { return materialData_->color; }
+
+    /// <summary>
+    /// 色のSetter
+    /// </summary>
+    void SetColor(const Math::Vector4& color) { this->materialData_->color = color; }
+
+    // [NEW] サイズ (Size) の Getter と Setter を追加
+/// <summary>
+/// サイズのGetter
+/// </summary>
+    const Math::Vector2& GetSize() const { return size_; }
+
+    /// <summary>
+    /// サイズのSetter
+    /// </summary>
+    void SetSize(const Math::Vector2& size) { this->size_ = size; }
+
 private:
     //SpriteCommon のポインタをメンバ変数として保持
     SpriteCommon* spriteCommon_ = nullptr; // nullptrlで初期化
@@ -92,4 +150,13 @@ private:
 
     // [NEW] 行列更新処理をカプセル化するためのプライベートメソッド
     void UpdateTransformationMatrix();
+
+
+    // [NEW] 座標をメンバ変数として保持 (Vector2)
+    Math::Vector2 position_ = { 0.0f, 0.0f }; 
+
+    float rotation = 0.0f;
+
+    // [NEW] サイズをメンバ変数として保持 (Vector2)
+    Math::Vector2 size_ = { 1.0f, 1.0f };
 };

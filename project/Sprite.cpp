@@ -97,10 +97,10 @@ void Sprite::CreateMaterial() {
     // --- 1. マテリアルリソースを作る (ConstantBuffer) ---
     // Sprite::Material構造体のサイズでリソースを作成
     materialResource_ = spriteCommon_->GetDxCommon()->CreateBufferResource(sizeof(Material));
-
+    assert(materialResource_);
     // --- 2. マテリアルリソースにデータを書き込むためのアドレスを取得 ---
-    materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
-
+    HRESULT hr = materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+    assert(SUCCEEDED(hr));
     // --- 3. マテリアルデータの初期値を書き込む (スライドの指示) ---
     materialData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
     materialData_->enableLighting = false; // false = 0
@@ -168,6 +168,11 @@ void Sprite::Update() {
 
     // 行列更新処理を呼び出す
     UpdateTransformationMatrix();
+
+
+    transform_.translate = { position_.x,position_.y,0.0f };
+
+    transform_.scale = { size_.x, size_.y, 1.0f };
 
     // TODO: 必要に応じて、マテリアルの色やUV情報などを更新するロジックを追加
 }
