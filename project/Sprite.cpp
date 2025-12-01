@@ -56,10 +56,21 @@ void Sprite::CreateVertexData() {
     // --- 3. VertexData の初期値設定 (main.cpp から移植) ---
     // ※ ここではスプライトのサイズを仮で 128x128 と設定するロジックを移植します
     // main.cppの座標 {0.0f,360.0f}, {0.0f,0.0f}, {640.0f,360.0f}, {640.0f,0.0f}
-    float left = 0.0f;
-    float top = 0.0f;
-    float right = 128.0f; // 仮の幅
-    float bottom = 128.0f; // 仮の高さ
+    float left = 0.0f-anchorPoint_.x;
+    float top = 0.0f-anchorPoint_.y;
+    float right = 1.0f-anchorPoint_.x; // 仮の幅
+    float bottom = 1.0f-anchorPoint_.y; // 仮の高さ
+
+    //左右反転
+    if (isFlipX_) {
+        left = -left;
+        right = -right;
+    }
+    //上下反転
+    if (isFlipY_) {
+        top = -top;
+        bottom = -bottom;
+    }
 
     vertexData_[0].position = { left, bottom, 0.0f, 1.0f };    // 左下
     vertexData_[0].texcoord = { 0.0f, 1.0f };

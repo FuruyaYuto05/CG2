@@ -83,6 +83,15 @@ public:
     /// </summary>
     void SetSize(const Math::Vector2& size) { this->size_ = size; }
 
+
+
+    const Math::Vector2& GetAnchorPoint() const { return anchorPoint_; }
+
+    void SetAnchorPoint(const Math::Vector2& anchorPoint) { this->anchorPoint_ = anchorPoint; }
+
+    bool isFlipX_ = false;
+    bool isFlipY_ = false;
+
 private:
     //SpriteCommon のポインタをメンバ変数として保持
     SpriteCommon* spriteCommon_ = nullptr; // nullptrlで初期化
@@ -164,4 +173,8 @@ private:
 
     // [NEW] サイズをメンバ変数として保持 (Vector2)
     Math::Vector2 size_ = { 1.0f, 1.0f };
+
+    Math::Vector2 anchorPoint_ = { 0.0f, 0.0f };
+
+
 };
