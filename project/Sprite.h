@@ -83,6 +83,27 @@ public:
     /// </summary>
     void SetSize(const Math::Vector2& size) { this->size_ = size; }
 
+
+    const Math::Vector2& GetAnchorPoint() const { return anchorPoint_; }
+
+    void SetAnchorPoint(const Math::Vector2& anchorPoint) { this->anchorPoint_ = anchorPoint; }
+
+    // --- フリップ Setter ---
+    void SetFlipX(bool isFlipX) { this->isFlipX_ = isFlipX; }
+    void SetFlipY(bool isFlipY) { this->isFlipY_ = isFlipY; }
+
+    // --- フリップ Getter ---
+    bool GetFlipX() const { return isFlipX_; }
+    bool GetFlipY() const { return isFlipY_; }
+
+    // --- テクスチャ範囲指定 setter ---
+    void SetTextureLeftTop(const Math::Vector2& leftTop) { textureLeftTop_ = leftTop; }
+    void SetTextureSize(const Math::Vector2& size) { textureSize_ = size; }
+
+    // --- テクスチャ範囲指定 getter ---
+    const Math::Vector2& GetTextureLeftTop() const { return textureLeftTop_; }
+    const Math::Vector2& GetTextureSize() const { return textureSize_; }
+
 private:
     //SpriteCommon のポインタをメンバ変数として保持
     SpriteCommon* spriteCommon_ = nullptr; // nullptrlで初期化
@@ -163,5 +184,19 @@ private:
     float rotation = 0.0f;
 
     // [NEW] サイズをメンバ変数として保持 (Vector2)
-    Math::Vector2 size_ = { 1.0f, 1.0f };
+    Math::Vector2 size_ = { 16.0f, 16.0f };
+
+    Math::Vector2 anchorPoint_ = { 0.0f,0.0f };
+
+    bool isFlipX_ = false;
+    // 上下フリップ
+    bool isFlipY_ = false;
+
+    // テクスチャ左上座標
+    Math::Vector2 textureLeftTop_ = { 0.0f, 0.0f };
+
+    // テクスチャ切り出しサイズ
+    Math::Vector2 textureSize_ = { 100.0f, 100.0f };
+
+    void AdjustTextureSize();
 };

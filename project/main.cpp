@@ -647,6 +647,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
+
 	////DXGIファクトリーの作成
 	IDXGIFactory7* dxgiFactory = nullptr;
 	////HRESULTはWindows刑のエラーコードであり、
@@ -1159,7 +1160,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	std::vector<Sprite*> sprites;
-	for (uint32_t i = 0; i < 5; ++i) {
+	for (uint32_t i = 0; i < 1; ++i) {
 		Sprite* sprite = new Sprite();
 		sprite->Initialize(spriteCommon, "resources/uvChecker.png");
 		float x_position = 100.0f + 150.0f * i;
@@ -1168,11 +1169,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	
 
-	Sprite* sprite = new Sprite();
-	// Initialize()に SpriteCommon などの必要な情報を渡す想定
-	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
-	
 
+	//Sprite* sprite = new Sprite();
+	//// Initialize()に SpriteCommon などの必要な情報を渡す想定
+	//sprite->Initialize(spriteCommon, "resources/uvChecker.png");
+	
+	//一つだけ
+	Sprite* spriteUI = sprites[0];
 
 	//ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -1243,38 +1246,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat3("Sprite scale", &transformSprite.scale.x, 0.1f);
 			
 			// 1. 現在の位置を取得
-			Math::Vector2 currentPos = sprite->GetPosition();
-			Math::Vector3 currentRot = sprite->GetRotation();
-			
-			Math::Vector2 currentSize = sprite->GetSize();
+			Math::Vector2 currentPos = spriteUI->GetPosition();
+			Math::Vector3 currentRot = spriteUI->GetRotation();
+			Math::Vector2 currentSize = spriteUI->GetSize();
 
 			// 2. DragFloat2 で編集（ここでは Vector3ではなく Vector2 が適切）
 			// ImGui::DragFloat2 を使って位置を編集します。
 			if (ImGui::DragFloat2("Position", &currentPos.x, 1.0f))
 			{
 				// 3. 編集された値を Setter で設定
-				sprite->SetPosition(currentPos);
+				spriteUI->SetPosition(currentPos);
 			}
 
 
 			// --- Rotation (Vector3) ---
 			if (ImGui::DragFloat3("Rotation", &currentRot.x, 0.01f)) {
 				// [FIX] Vector3 の変数を Setter に渡す
-				sprite->SetRotation(currentRot);
+				spriteUI->SetRotation(currentRot);
 			}
 
 			// [NEW] Color の Getter/Setter を使った ImGui ウィジェットを追加
-			Math::Vector4 currentColor = sprite->GetColor();
+			Math::Vector4 currentColor = spriteUI->GetColor();
 
 			// DragFloat4 ではなく ColorEdit4 を使うことで、カラーピッカーが表示される
 			if (ImGui::ColorEdit4("Color", &currentColor.x, ImGuiColorEditFlags_AlphaPreview)) {
 				// 編集された値を Setter で設定
-				sprite->SetColor(currentColor);
+				spriteUI->SetColor(currentColor);
 			}
 
 			if (ImGui::DragFloat2("Size", &currentSize.x, 0.1f, 0.1f, 1000.0f)) // 1.0f 単位で、最小 1.0f までの制限
 			{
-				sprite->SetSize(currentSize);
+				spriteUI->SetSize(currentSize);
 			}
 
 			ImGui::End();
@@ -1414,7 +1416,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
-	delete sprite;
+	//delete sprite;
 
 	delete input;
 

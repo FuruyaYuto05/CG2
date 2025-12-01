@@ -28,6 +28,8 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, const std::string& textureFi
     // [NEW] 座標変換行列作成関数を呼び出す
     CreateTransformationMatrix();
 
+    AdjustTextureSize();
+
     // TODO: 今後、ここにリソース生成のロジックを実装していく
 }
 
@@ -56,19 +58,8 @@ void Sprite::CreateVertexData() {
     // --- 3. VertexData の初期値設定 (main.cpp から移植) ---
     // ※ ここではスプライトのサイズを仮で 128x128 と設定するロジックを移植します
     // main.cppの座標 {0.0f,360.0f}, {0.0f,0.0f}, {640.0f,360.0f}, {640.0f,0.0f}
-    float left = 0.0f;
-    float top = 0.0f;
-    float right = 128.0f; // 仮の幅
-    float bottom = 128.0f; // 仮の高さ
+   
 
-    vertexData_[0].position = { left, bottom, 0.0f, 1.0f };    // 左下
-    vertexData_[0].texcoord = { 0.0f, 1.0f };
-    vertexData_[1].position = { left, top, 0.0f, 1.0f };       // 左上
-    vertexData_[1].texcoord = { 0.0f, 0.0f };
-    vertexData_[2].position = { right, bottom, 0.0f, 1.0f };   // 右下
-    vertexData_[2].texcoord = { 1.0f, 1.0f };
-    vertexData_[3].position = { right, top, 0.0f, 1.0f };      // 右上
-    vertexData_[3].texcoord = { 1.0f, 0.0f };
     // Normalは一旦0で埋める
     vertexData_[0].normal = { 0.0f, 0.0f, -1.0f };
     vertexData_[1].normal = { 0.0f, 0.0f, -1.0f };
@@ -169,13 +160,56 @@ void Sprite::Update() {
     // -> 現状、頂点/インデックスデータは固定のため、Update()では省略。
     //    位置やサイズが変わる場合に、UpdateVertexData()を呼び出します。
 
-    // 行列更新処理を呼び出す
-    UpdateTransformationMatrix();
-
-
     transform_.translate = { position_.x,position_.y,0.0f };
 
     transform_.scale = { size_.x, size_.y, 1.0f };
+
+
+    // 行列更新処理を呼び出す
+    UpdateTransformationMatrix();
+
+    float left = -size_.x * anchorPoint_.x;
+    float right = size_.x * (1.0f - anchorPoint_.x);
+    float top = -size_.y * anchorPoint_.y;
+    float bottom = size_.y * (1.0f - anchorPoint_.y);
+
+    //左右反転
+    if (isFlipX_) {
+        left = -left;
+        right = -right;
+    }
+    //上下反転
+    if (isFlipY_) {
+        top = -top;
+        bottom = -bottom;
+    }
+
+    // ① メタデータ取得（テクスチャの横幅・高さ）
+    const DirectX::TexMetadata& metadata =
+        TextureManager::GetInstance()->GetMetaData(textureIndex);
+
+    // ② ピクセル座標 → UV座標(0〜1)に変換
+    float tex_left = textureLeftTop_.x / metadata.width;
+    float tex_right = (textureLeftTop_.x + textureSize_.x) / metadata.width;
+    float tex_top = textureLeftTop_.y / metadata.height;
+    float tex_bottom = (textureLeftTop_.y + textureSize_.y) / metadata.height;
+
+    // 左下
+    vertexData_[0].position = { left,  bottom, 0.0f, 1.0f };
+    vertexData_[0].texcoord = { tex_left, tex_bottom };
+
+    // 左上
+    vertexData_[1].position = { left,  top, 0.0f, 1.0f };
+    vertexData_[1].texcoord = { tex_left, tex_top };
+
+    // 右下
+    vertexData_[2].position = { right, bottom, 0.0f, 1.0f };
+    vertexData_[2].texcoord = { tex_right, tex_bottom };
+
+    // 右上
+    vertexData_[3].position = { right, top, 0.0f, 1.0f };
+    vertexData_[3].texcoord = { tex_right, tex_top };
+
 
     // TODO: 必要に応じて、マテリアルの色やUV情報などを更新するロジックを追加
 }
@@ -212,4 +246,17 @@ void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
     // 6. 描画! (DrawCall)
     // インデックス数 6, インスタンス数 1 で描画
     commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+}
+
+void Sprite::AdjustTextureSize() {
+    // ① テクスチャのメタデータを取得
+    const DirectX::TexMetadata& metadata =
+        TextureManager::GetInstance()->GetMetaData(textureIndex);
+
+    // ② 切り出しサイズ = 画像の実サイズを反映
+    textureSize_.x = static_cast<float>(metadata.width);
+    textureSize_.y = static_cast<float>(metadata.height);
+
+    // ③ スプライトの見た目のサイズも（画像サイズに揃える場合）
+    size_ = textureSize_;
 }
