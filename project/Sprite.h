@@ -172,7 +172,7 @@ private:
     float rotation = 0.0f;
 
     // [NEW] サイズをメンバ変数として保持 (Vector2)
-    Math::Vector2 size_ = { 1.0f, 1.0f };
+    Math::Vector2 size_ = { 16.0f, 16.0f };
 
     Math::Vector2 anchorPoint_ = { 0.0f, 0.0f };
 

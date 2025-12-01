@@ -56,10 +56,15 @@ void Sprite::CreateVertexData() {
     // --- 3. VertexData の初期値設定 (main.cpp から移植) ---
     // ※ ここではスプライトのサイズを仮で 128x128 と設定するロジックを移植します
     // main.cppの座標 {0.0f,360.0f}, {0.0f,0.0f}, {640.0f,360.0f}, {640.0f,0.0f}
-    float left = 0.0f-anchorPoint_.x;
-    float top = 0.0f-anchorPoint_.y;
-    float right = 1.0f-anchorPoint_.x; // 仮の幅
-    float bottom = 1.0f-anchorPoint_.y; // 仮の高さ
+    //float left = 0.0f-anchorPoint_.x;
+    //float top = 0.0f-anchorPoint_.y;
+    //float right = 1.0f-anchorPoint_.x; // 仮の幅
+    //float bottom = 1.0f-anchorPoint_.y; // 仮の高さ
+
+    float left = -size_.x * anchorPoint_.x;
+    float right = size_.x * (1.0f - anchorPoint_.x);
+    float top = -size_.y * anchorPoint_.y;
+    float bottom = size_.y * (1.0f - anchorPoint_.y);
 
     //左右反転
     if (isFlipX_) {
@@ -72,14 +77,30 @@ void Sprite::CreateVertexData() {
         bottom = -bottom;
     }
 
-    vertexData_[0].position = { left, bottom, 0.0f, 1.0f };    // 左下
+    // 左下
+    vertexData_[0].position = { left,  bottom, 0.0f, 1.0f };
     vertexData_[0].texcoord = { 0.0f, 1.0f };
-    vertexData_[1].position = { left, top, 0.0f, 1.0f };       // 左上
+
+    // 左上
+    vertexData_[1].position = { left,  top, 0.0f, 1.0f };
     vertexData_[1].texcoord = { 0.0f, 0.0f };
-    vertexData_[2].position = { right, bottom, 0.0f, 1.0f };   // 右下
+
+    // 右下
+    vertexData_[2].position = { right, bottom, 0.0f, 1.0f };
     vertexData_[2].texcoord = { 1.0f, 1.0f };
-    vertexData_[3].position = { right, top, 0.0f, 1.0f };      // 右上
+
+    // 右上
+    vertexData_[3].position = { right, top, 0.0f, 1.0f };
     vertexData_[3].texcoord = { 1.0f, 0.0f };
+
+    //vertexData_[0].position = { left, bottom, 0.0f, 1.0f };    // 左下
+    //vertexData_[0].texcoord = { 0.0f, 1.0f };
+    //vertexData_[1].position = { left, top, 0.0f, 1.0f };       // 左上
+    //vertexData_[1].texcoord = { 0.0f, 0.0f };
+    //vertexData_[2].position = { right, bottom, 0.0f, 1.0f };   // 右下
+    //vertexData_[2].texcoord = { 1.0f, 1.0f };
+    //vertexData_[3].position = { right, top, 0.0f, 1.0f };      // 右上
+    //vertexData_[3].texcoord = { 1.0f, 0.0f };
     // Normalは一旦0で埋める
     vertexData_[0].normal = { 0.0f, 0.0f, -1.0f };
     vertexData_[1].normal = { 0.0f, 0.0f, -1.0f };
