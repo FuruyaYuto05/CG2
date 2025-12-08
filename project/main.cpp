@@ -25,6 +25,10 @@
 #include "Sprite.h"
 #include "Math.h"
 #include "TextureManager.h"
+#include "Object3dCommon.h"
+#include "Object3d.h"
+
+
 
 using namespace Microsoft::WRL;
 
@@ -646,6 +650,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//スプライト共通部の初期化
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
+
+
+	// 3Dオブジェクト共通部
+	Object3dCommon* object3dCommon = nullptr;
+
+	// 3Dオブジェクト共通部の初期化
+	object3dCommon = new Object3dCommon;
+	object3dCommon->Initialize();
+
+	// 3Dオブジェクト
+	Object3d* object3d = nullptr;
+	object3d = new Object3d();
+	object3d->Initialize();
 
 
 	////DXGIファクトリーの作成
@@ -1479,6 +1496,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	winApp->Finalize();
 
 	TextureManager::GetInstance()->Finalize();
+
+	// 3Dオブジェクトの解放
+	delete object3d;
+
+	// 3Dオブジェクト共通部の解放
+	delete object3dCommon;
+
 
 	delete dxCommon;
 
