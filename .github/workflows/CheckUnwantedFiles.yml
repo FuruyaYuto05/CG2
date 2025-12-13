@@ -40,7 +40,7 @@ jobs:
           done
           unset NAME_CONDITIONS[0]
 
-          UNWANTED_LIST=$(find , -path "./.git" -prune -o \
+          UNWANTED_LIST=$(find . -path "./.git" -prune -o \
             \( \( "${DIR_CONDITIONS[@]}" \) -a -type d -print -prune \) -o \
             \( \( "${NAME_CONDITIONS[@]}" \) -a -type f -print \) \
           )
