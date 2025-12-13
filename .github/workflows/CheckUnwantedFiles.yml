@@ -8,13 +8,9 @@ on:
       - master
 
 env:
+  UNWANTED_NAME_PATTERNS: "*.pdb *.lik *.user *.ncb*.suo *.log *.dmp *.zip imgui.ini desktop.inidxcompiler.dll dxil.dll"
 
-  UNWANTED_NAME_PATTERNS: "*.pdb *.lik *.user *.ncb
-*.suo *.log *.dmp *.zip imgui.ini desktop.ini
-dxcompiler.dll dxil.dll"
-
-  UNWANTED_DIR_PATTERNS: "generated x64 win32 arm64 .vs
-bin ipch logs Dump"
+  UNWANTED_DIR_PATTERNS: "generated x64 win32 arm64 .vsbin ipch logs Dump"
 
 jobs:
   check-files:
@@ -26,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 不要なファイルとディレクトリを検索 (bash)
-        shell: bash
+        
         run:
           # ディレクトリ条件を構築
           DIR_CONDITIONS=()
