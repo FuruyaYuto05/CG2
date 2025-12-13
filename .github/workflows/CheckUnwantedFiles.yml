@@ -2,15 +2,16 @@ name: CheckUnwantedFiles
 
 on:
   workflow_dispatch:
-
   push:
     branches:
       - master
 
 env:
-  UNWANTED_NAME_PATTERNS: "*.pdb *.lik *.user *.ncb*.suo *.log *.dmp *.zip imgui.ini desktop.inidxcompiler.dll dxil.dll"
+  # 不要なファイル名（スペース区切り）
+  UNWANTED_NAME_PATTERNS: "*.pdb *.ilk *.user *.ncb *.suo *.log *.dmp *.zip imgui.ini desktop.ini dxcompiler.dll dxil.dll"
 
-  UNWANTED_DIR_PATTERNS: "generated x64 win32 arm64 .vsbin ipch logs Dump"
+  # 不要なディレクトリ名（スペース区切り）
+  UNWANTED_DIR_PATTERNS: "generated x64 win32 arm64 .vs bin ipch logs Dump"
 
 jobs:
   check-files:
@@ -22,32 +23,33 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 不要なファイルとディレクトリを検索（bash）
-  shell: bash
-  run: |
-    # ディレクトリ条件
-    DIR_CONDITIONS=()
-    for pattern in $UNWANTED_DIR_PATTERNS; do
-      DIR_CONDITIONS+=(-o -iname "$pattern")
-    done
-    unset DIR_CONDITIONS[0]
+        shell: bash
+        run: |
+          echo "=== ディレクトリ条件を構築 ==="
+          DIR_CONDITIONS=()
+          for pattern in $UNWANTED_DIR_PATTERNS; do
+            DIR_CONDITIONS+=(-o -iname "$pattern")
+          done
+          unset DIR_CONDITIONS[0]
 
-    # ファイル条件
-    NAME_CONDITIONS=()
-    for pattern in $UNWANTED_NAME_PATTERNS; do
-      NAME_CONDITIONS+=(-o -iname "$pattern")
-    done
-    unset NAME_CONDITIONS[0]
+          echo "=== ファイル条件を構築 ==="
+          NAME_CONDITIONS=()
+          for pattern in $UNWANTED_NAME_PATTERNS; do
+            NAME_CONDITIONS+=(-o -iname "$pattern")
+          done
+          unset NAME_CONDITIONS[0]
 
-    UNWANTED_LIST=$(find . \
-      -path "./.git/*" -prune -o \
-      \( \( "${DIR_CONDITIONS[@]}" \) -a -type d -print -prune \) -o \
-      \( \( "${NAME_CONDITIONS[@]}" \) -a -type f -print \) \
-    )
+          echo "=== 不要なファイル・ディレクトリを検索 ==="
+          UNWANTED_LIST=$(find . \
+            -path "./.git/*" -prune -o \
+            \( \( "${DIR_CONDITIONS[@]}" \) -a -type d -print -prune \) -o \
+            \( \( "${NAME_CONDITIONS[@]}" \) -a -type f -print \) \
+          )
 
-    if [ -n "$UNWANTED_LIST" ]; then
-      echo "::error::不要なファイルまたはディレクトリが見つかりました！"
-      echo "$UNWANTED_LIST"
-      exit 1
-    fi
+          if [ -n "$UNWANTED_LIST" ]; then
+            echo "::error::不要なファイルまたはディレクトリが見つかりました！"
+            echo "$UNWANTED_LIST"
+            exit 1
+          fi
 
-    echo "リポジトリはクリーンです。"
+          echo "リポジトリはクリーンです。"
