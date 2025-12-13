@@ -35,7 +35,7 @@ jobs:
           unset DIR_CONDITIONS[0]
 
           NAME_CONDITIONS=()
-          for pattern on $UNWANTED_NAME_PATTERNS; do
+          for pattern in $UNWANTED_NAME_PATTERNS; do
             NAME_CONDITIONS+=(-o -iname "&pattern")
           done
           unset NAME_CONDITIONS[0]
