@@ -25,7 +25,7 @@ jobs:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: 不要なファイルとディレクトリを検索(bash)
+      - name: 不要なファイルとディレクトリを検索 (bash)
         run:
           # ディレクトリ条件を構築
           DIR_CONDITIONS=()
@@ -36,7 +36,7 @@ jobs:
 
           NAME_CONDITIONS=()
           for pattern in $UNWANTED_NAME_PATTERNS; do
-            NAME_CONDITIONS+=(-o -iname "&pattern")
+            NAME_CONDITIONS+=(-o -iname "$pattern")
           done
           unset NAME_CONDITIONS[0]
 
