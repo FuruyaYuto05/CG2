@@ -29,7 +29,7 @@ jobs:
         run:
           # ディレクトリ条件を構築
           DIR_CONDITIONS=()
-          for pattern in $UNWANTED_DIR_PATTERNS; dxcompiler
+          for pattern in $UNWANTED_DIR_PATTERNS; do
             DIR_CONDITIONS+=(-o -iname "$pattern")
           done
           unset DIR_CONDITIONS[0]
