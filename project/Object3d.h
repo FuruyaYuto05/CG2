@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 #include "Math.h"
+#include <wrl.h>
+#include <d3d12.h>
+
 
 // 前方宣言
 class Object3dCommon;
@@ -30,6 +33,18 @@ private:
         MaterialData material;
     };
 
+    struct Material {
+        Math::Vector4 color;
+        int32_t enableLighting;
+        float padding[3];
+        Math::Matrix4x4 uvTransform;
+    };
+
+    struct TransformationMatrix {
+        Math::Matrix4x4 WVP;
+        Math::Matrix4x4 World;
+    };
+
     // Objファイルのデータ
     ModelData modelData_;
 
@@ -47,5 +62,19 @@ private:
 
     // バッファビュー
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView_;
+
+    // バッファリソース
+    Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+
+    // バッファリソースのデータを指すポインタ
+    Material* materialData_ = nullptr;
+
+    // 座標変換行列用定数バッファ
+    Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource_;
+
+    // 座標変換行列用定数バッファの中身を指すポインタ
+    TransformationMatrix* transformationMatrixData_ = nullptr;
+
+
 
 };

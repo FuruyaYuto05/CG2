@@ -10,7 +10,7 @@ void Object3d::Initialize(Object3dCommon* object3dCommon)
     modelData_ = LoadObjFile("resources", "plane.obj");
 
     // ----------------------------------------
-    // 頂点データの初期化（スライド内容）
+    // 頂点データの初期化
     // ----------------------------------------
 
     // 頂点数
@@ -32,4 +32,40 @@ void Object3d::Initialize(Object3dCommon* object3dCommon)
     vertexBufferView_.BufferLocation = vertexBuffer_->GetGPUVirtualAddress();
     vertexBufferView_.SizeInBytes = bufferSize;
     vertexBufferView_.StrideInBytes = sizeof(VertexData);
+
+    // ----------------------------------------
+    // マテリアルの初期化
+    // ----------------------------------------
+
+    // マテリアル用定数バッファを作成
+    materialResource_ = object3dCommon_->GetDxCommon()->CreateBufferResource(sizeof(Material));
+
+    // バッファにデータを書き込むためのアドレスを取得
+    materialResource_->Map(0,nullptr,reinterpret_cast<void**>(&materialData_));
+
+    // マテリアルの初期値
+    materialData_->color = Math::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+    materialData_->enableLighting = false;
+    materialData_->uvTransform = Math::MakeIdentity4x4();
+
+    // ----------------------------------------
+    // 座標変換行列の初期化
+    // ----------------------------------------
+
+// 座標変換行列用定数バッファを作成
+    transformationMatrixResource_ =
+        object3dCommon_->GetDxCommon()->CreateBufferResource(sizeof(TransformationMatrix));
+
+    // バッファにデータを書き込むためのアドレスを取得
+    transformationMatrixResource_->Map(
+        0,
+        nullptr,
+        reinterpret_cast<void**>(&transformationMatrixData_)
+    );
+
+    // 単位行列を書き込む
+    transformationMatrixData_->WVP = Math::MakeIdentity4x4();
+    transformationMatrixData_->World = Math::MakeIdentity4x4();
+
+
 }
