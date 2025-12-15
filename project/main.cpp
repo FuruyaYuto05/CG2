@@ -657,12 +657,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// 3Dオブジェクト共通部の初期化
 	object3dCommon = new Object3dCommon;
-	object3dCommon->Initialize();
+	object3dCommon->Initialize(dxCommon);
 
 	// 3Dオブジェクト
 	Object3d* object3d = nullptr;
 	object3d = new Object3d();
-	object3d->Initialize();
+	object3d->Initialize(object3dCommon);
 
 
 	////DXGIファクトリーの作成

@@ -14,6 +14,8 @@ class Object3d
 public:
     // 初期化
     void Initialize(Object3dCommon* object3dCommon);
+    void Update();
+    void Draw();
 
 private:
     Object3dCommon* object3dCommon_ = nullptr;
@@ -26,6 +28,7 @@ private:
 
     struct MaterialData {
         std::string textureFilePath;
+        uint32_t textureIndex = 0;
     };
 
     struct ModelData {
@@ -44,6 +47,14 @@ private:
         Math::Matrix4x4 WVP;
         Math::Matrix4x4 World;
     };
+
+    // 平行光源データ
+    struct DirectionalLight {
+        Math::Vector4 color;     // ライトの色
+        Math::Vector3 direction; // ライトの向き
+        float intensity;         // 光の強さ（または padding）
+    };
+
 
     // Objファイルのデータ
     ModelData modelData_;
@@ -75,6 +86,9 @@ private:
     // 座標変換行列用定数バッファの中身を指すポインタ
     TransformationMatrix* transformationMatrixData_ = nullptr;
 
+    // Transform（位置・回転・スケール）
+    Math::Transform transform_;
+    Math::Transform cameraTransform_;
 
 
 };
