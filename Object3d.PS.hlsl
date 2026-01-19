@@ -5,6 +5,8 @@ struct Material
 {
     float32_t4 color;
     int32_t enableLighting;
+    
+    float32_t shininess;
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 Texture2D<float32_t4> gTexture : register(t0);
@@ -23,6 +25,12 @@ struct DirectionalLight
 };
 
 ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
+
+struct Camera
+{
+    float32_t3 worldPosition;
+};
+ConstantBuffer<Camera> gCamera : register(b2);
 
 PixelShaderOutput main(VertexShaderOutput input)
 {
@@ -48,11 +56,31 @@ PixelShaderOutput main(VertexShaderOutput input)
         // 2. 2乗して拡散反射光の係数（diffuse）とする
         float32_t diffuse = pow(halfLambertRamp, 2.0f);
         
+        
+        float32_t3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
+        
+        
+        // 1. 入射光の反射ベクトルを求める (reflect関数)
+        // 入射光(direction)と法線(normal)を使って反射方向を計算
+        float32_t3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
+
+        // 2. 鏡面反射の強さを求める (R・E の shininess乗)
+        // 反射光(reflectLight)と視線(toEye)の内積をとる
+        float32_t RdotE = dot(reflectLight, toEye);
+        // 負の値にならないようにsaturateし、shininess乗してハイライトの鋭さを調整
+        float32_t specularPow = pow(saturate(RdotE), gMaterial.shininess);
+        
         // 最終的な出力カラーを計算
-        
-        // 💡 修正箇所1: RGB成分 (ライティングと強度を適用)
-        output.color.rgb = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * diffuse * gDirectionalLight.intensity;
-        
+       // 拡散反射光（Diffuse）の計算
+        float32_t3 diffuseColor = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * diffuse * gDirectionalLight.intensity;
+
+        // 鏡面反射光（Specular）の計算
+        // 光源の色 * 光源の強度 * 鏡面反射の強さ
+        // ※鏡面反射はテクスチャの色を乗算しないのが一般的です（光そのものの色が反射するため）
+        float32_t3 specularColor = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow;
+
+        // 最終的な色 = 拡散反射 + 鏡面反射
+        output.color.rgb = diffuseColor + specularColor;
         // 💡 修正箇所2: アルファ成分 (テクスチャとマテリアルのアルファ値のみを適用)
         // ライティング計算（intensityなど）の影響を受けないように分離
         output.color.a = gMaterial.color.a * textureColor.a;
