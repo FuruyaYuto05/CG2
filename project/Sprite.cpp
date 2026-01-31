@@ -145,9 +145,9 @@ void Sprite::UpdateTransformationMatrix() {
     // WinApp.hをSprite.cppでインクルードして、定数を参照する必要があります。
     Math::Matrix4x4 projectionMatrix = Math::MakeOrthorgraphicMatrix(
         0.0f,
-        (float)WinApp::kClientHeight, // 画面サイズが上下反転している場合は、この値に注意
+        0.0f,                          // [FIX] ここを 0.0f に変更 (Top = 0)
         (float)WinApp::kClientWidth,
-        0.0f,
+        (float)WinApp::kClientHeight,  // [FIX] ここを Height に変更 (Bottom = Height)
         0.0f,
         100.0f
     );
