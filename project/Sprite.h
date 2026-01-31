@@ -3,6 +3,8 @@
 #include "Math.h" 
 #include <d3d12.h>
 #include <wrl.h>
+#include <string>
+
 
 // スプライト共通部（SpriteCommon）のポインタ型を使用するため、前方宣言を行う
 class SpriteCommon;
@@ -11,9 +13,12 @@ class SpriteCommon;
 class Sprite
 {
 public:
+
+    uint32_t textureIndex = 0;
+
     // 初期化
     // [FIX] SpriteCommon* を引数として受け取る
-    void Initialize(SpriteCommon* spriteCommon);
+    void Initialize(SpriteCommon* spriteCommon, const std::string& textureFilePath);
 
     void Update();
 

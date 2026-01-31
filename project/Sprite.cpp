@@ -5,14 +5,17 @@
 #include "Math.h"
 #include "WinApp.h" // [FIX] WinApp::kClientWidth/Height を参照するために追加
 #include <algorithm>
+#include "TextureManager.h"
 
 
 // 初期化
 // [FIX] Initialize の引数に SpriteCommon* を追加
-void Sprite::Initialize(SpriteCommon* spriteCommon)
+void Sprite::Initialize(SpriteCommon* spriteCommon, const std::string& textureFilePath)
 {
     // [NEW] スライドの指示通り、引数で受け取ったポインタをメンバ変数に記録する
     this->spriteCommon_ = spriteCommon;
+
+    textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 
     // ポインタが有効か確認
     assert(this->spriteCommon_ != nullptr);
@@ -201,8 +204,7 @@ void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
     //    ⇒ 正確には、SRVのヒープ自体は SetCommonDrawSettings でセット済みなので、ここでは個別の SRV のハンドルを設定します。
     // commandList->SetGraphicsRootDescriptorTable(2, spriteCommon_->GetSRVGPUDescriptorHandle(0)); // GetSRVGPUDescriptorHandle は仮のメソッド
 
-    commandList->SetGraphicsRootDescriptorTable(2, spriteCommon_->GetDxCommon()->GetSRVGPUDescriptorHandle(0));
-
+    commandList->SetGraphicsRootDescriptorTable(2,TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
     // ToDo: SRVハンドルの取得ロジックが必要だが、今回は main.cpp の描画コマンドをそのまま移植し、
     //      テクスチャアトラスを考慮しない暫定的なコードとする。
     //      main.cpp で使われていた D3D12_GPU_DESCRIPTOR_HANDLE を直接参照できないため、一旦この行は保留し、DrawCallに進みます。

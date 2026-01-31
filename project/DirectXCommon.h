@@ -19,6 +19,8 @@ class DirectXCommon
 public:
 	void Initialize(WinApp* winApp);
 
+	static const uint32_t kMaxSRVCount;
+
 	ID3D12Device* GetDevice() const { return device_.Get(); }
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList_.Get(); }
 
