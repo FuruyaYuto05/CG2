@@ -158,10 +158,10 @@ private:
 
 
     // [NEW] 座標をメンバ変数として保持 (Vector2)
-    Math::Vector2 position_ = { 0.0f, 0.0f }; 
+    Math::Vector2 position_ = { 500.0f, 400.0f }; 
 
     float rotation = 0.0f;
 
     // [NEW] サイズをメンバ変数として保持 (Vector2)
-    Math::Vector2 size_ = { 1.0f, 1.0f };
+    Math::Vector2 size_ = { 100.0f, 100.0f };
 };

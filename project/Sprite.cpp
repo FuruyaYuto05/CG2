@@ -58,8 +58,8 @@ void Sprite::CreateVertexData() {
     // main.cppの座標 {0.0f,360.0f}, {0.0f,0.0f}, {640.0f,360.0f}, {640.0f,0.0f}
     float left = 0.0f;
     float top = 0.0f;
-    float right = 128.0f; // 仮の幅
-    float bottom = 128.0f; // 仮の高さ
+    float right = 1.0f; // 仮の幅
+    float bottom = 1.0f; // 仮の高さ
 
     vertexData_[0].position = { left, bottom, 0.0f, 1.0f };    // 左下
     vertexData_[0].texcoord = { 0.0f, 1.0f };
@@ -169,13 +169,15 @@ void Sprite::Update() {
     // -> 現状、頂点/インデックスデータは固定のため、Update()では省略。
     //    位置やサイズが変わる場合に、UpdateVertexData()を呼び出します。
 
-    // 行列更新処理を呼び出す
-    UpdateTransformationMatrix();
+
 
 
     transform_.translate = { position_.x,position_.y,0.0f };
 
     transform_.scale = { size_.x, size_.y, 1.0f };
+
+    // 行列更新処理を呼び出す
+    UpdateTransformationMatrix();
 
     // TODO: 必要に応じて、マテリアルの色やUV情報などを更新するロジックを追加
 }

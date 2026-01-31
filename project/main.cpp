@@ -1192,7 +1192,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 			// [NEW] Sprite::Update() を呼び出す
-			//sprite->Update();
+			sprite->Update();
 
 			// スプライトの更新
             // vector の要素を一つずつ取り出す
