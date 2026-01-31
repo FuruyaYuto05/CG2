@@ -1353,7 +1353,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			spriteCommon->SetCommonDrawSettings(dxCommon->GetCommandList());
 
 			// [NEW] Sprite::Draw() を呼び出し、個別の描画コマンドを積む
-			//sprite->Draw(dxCommon->GetCommandList());
+			sprite->Draw(dxCommon->GetCommandList());
 
 			// 2. 個別スプライトの描画
             // vector の要素を一つずつ取り出し、Drawを呼び出す
