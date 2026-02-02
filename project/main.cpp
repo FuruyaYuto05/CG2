@@ -639,6 +639,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	TextureManager::GetInstance()->SetDirectXCommon(dxCommon);
 
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
+	TextureManager::GetInstance()->LoadTexture("monsterBall.png");
 
 	TextureManager::GetInstance()->Initialize();
 
@@ -1139,33 +1140,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	indexDataSprite[3] = 1; indexDataSprite[4] = 3; indexDataSprite[5] = 2;
 
 
-	//std::vector<std::string> texFiles = {
-	//"resources/uvChecker.png",
-	//"resources/checker2.png",
-	//"resources/checker3.png",
-	//"resources/checker4.png",
-	//"resources/checker5.png"
-	//};
+	// 1. まず、使いたい画像のファイル名をリストにします
+	std::vector<std::string> texFiles = {
+		"resources/uvChecker.png",
+		"monsterBall.png", // ← スライドで使っている別の画像のパスに変えてください
+		"resources/uvChecker.png",
+		"monsterBall.png",
+		"resources/uvChecker.png"
+	};
+
+	// ※注意: ここで使う画像は、事前に TextureManager::LoadTexture で読み込んでおく必要があります！
+	// もし読み込み済みでなければ、TextureManager::LoadTexture("resources/monsterBall.png"); などを追加してください。
+
+	std::vector<Sprite*> sprites;
+
+	for (uint32_t i = 0; i < 5; ++i) {
+		Sprite* sprite = new Sprite();
+
+		// 2. ループの番号 (i) に応じて、違うファイル名を取り出して渡します
+		// texFiles[i] を使うのがポイントです！
+		sprite->Initialize(spriteCommon, texFiles[i]);
+
+		float x_position = 100.0f + 150.0f * i;
+		sprite->SetPosition({ x_position, 100.0f });
+		sprite->SetSize({ 128.0f, 128.0f }); // 見やすいサイズに設定
+
+		sprites.push_back(sprite);
+	}
+
 
 	//std::vector<Sprite*> sprites;
-
 	//for (uint32_t i = 0; i < 5; ++i) {
 	//	Sprite* sprite = new Sprite();
-	//	sprite->Initialize(spriteCommon, texFiles[i]);  // ←個別の画像を指定！
+	//	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
 	//	float x_position = 100.0f + 150.0f * i;
 	//	sprite->SetPosition({ x_position, 100.0f });
 	//	sprites.push_back(sprite);
 	//}
-
-
-	std::vector<Sprite*> sprites;
-	for (uint32_t i = 0; i < 5; ++i) {
-		Sprite* sprite = new Sprite();
-		sprite->Initialize(spriteCommon, "resources/uvChecker.png");
-		float x_position = 100.0f + 150.0f * i;
-		sprite->SetPosition({ x_position, 100.0f });
-		sprites.push_back(sprite);
-	}
 	
 
 	Sprite* sprite = new Sprite();
@@ -1192,7 +1203,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 			// [NEW] Sprite::Update() を呼び出す
-			//sprite->Update();
+			sprite->Update();
 
 			// スプライトの更新
             // vector の要素を一つずつ取り出す
@@ -1353,7 +1364,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			spriteCommon->SetCommonDrawSettings(dxCommon->GetCommandList());
 
 			// [NEW] Sprite::Draw() を呼び出し、個別の描画コマンドを積む
-			//sprite->Draw(dxCommon->GetCommandList());
+			sprite->Draw(dxCommon->GetCommandList());
 
 			// 2. 個別スプライトの描画
             // vector の要素を一つずつ取り出し、Drawを呼び出す

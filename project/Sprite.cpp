@@ -28,6 +28,8 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, const std::string& textureFi
     // [NEW] 座標変換行列作成関数を呼び出す
     CreateTransformationMatrix();
 
+    AdjustTextureSize();
+
     // TODO: 今後、ここにリソース生成のロジックを実装していく
 }
 
@@ -58,8 +60,8 @@ void Sprite::CreateVertexData() {
     // main.cppの座標 {0.0f,360.0f}, {0.0f,0.0f}, {640.0f,360.0f}, {640.0f,0.0f}
     float left = 0.0f;
     float top = 0.0f;
-    float right = 128.0f; // 仮の幅
-    float bottom = 128.0f; // 仮の高さ
+    float right = 1.0f;  
+    float bottom = 1.0f; 
 
     vertexData_[0].position = { left, bottom, 0.0f, 1.0f };    // 左下
     vertexData_[0].texcoord = { 0.0f, 1.0f };
@@ -143,11 +145,11 @@ void Sprite::UpdateTransformationMatrix() {
     // ProjectionMatrixを作って平行投影行列を書き込む
     // WinApp::kClientWidth/Height は、メインループからアクセス可能な定数である前提
     // WinApp.hをSprite.cppでインクルードして、定数を参照する必要があります。
-    Math::Matrix4x4 projectionMatrix = Math::MakeOrthorgraphicMatrix(
+  Math::Matrix4x4 projectionMatrix = Math::MakeOrthorgraphicMatrix(
         0.0f,
-        (float)WinApp::kClientHeight, // 画面サイズが上下反転している場合は、この値に注意
+        0.0f,                          // [FIX] ここを 0.0f に変更 (Top = 0)
         (float)WinApp::kClientWidth,
-        0.0f,
+        (float)WinApp::kClientHeight,  // [FIX] ここを Height に変更 (Bottom = Height)
         0.0f,
         100.0f
     );
@@ -169,13 +171,66 @@ void Sprite::Update() {
     // -> 現状、頂点/インデックスデータは固定のため、Update()では省略。
     //    位置やサイズが変わる場合に、UpdateVertexData()を呼び出します。
 
+
+    // [NEW] アンカーポイントを使って、頂点の座標（0.0f～1.0fの範囲）をずらす
+    float left = 0.0f - anchorPoint_.x;
+    float right = 1.0f - anchorPoint_.x;
+    float top = 0.0f - anchorPoint_.y;
+    float bottom = 1.0f - anchorPoint_.y;
+
+    // 左右反転：アンカーポイントを基準に左右を入れ替える（符号を反転）
+    if (isFlipX_) {
+        left = -left;
+        right = -right;
+    }
+
+    // 上下反転：アンカーポイントを基準に上下を入れ替える（符号を反転）
+    if (isFlipY_) {
+        top = -top;
+        bottom = -bottom;
+    }
+
+
+    // [NEW] 左右上下の座標を頂点データに書き込む
+    // ※ vertexData_ は CreateVertexData() で Map してあるので、ここで書き込めばGPUに反映されます
+
+    // 左下 (Index 0)
+    vertexData_[0].position = { left, bottom, 0.0f, 1.0f };
+
+    // 左上 (Index 1)
+    vertexData_[1].position = { left, top, 0.0f, 1.0f };
+
+    // 右下 (Index 2)
+    vertexData_[2].position = { right, bottom, 0.0f, 1.0f };
+
+    // 右上 (Index 3)
+    vertexData_[3].position = { right, top, 0.0f, 1.0f };
+
+    // --- 2. [NEW] テクスチャ範囲指定（UV座標）の計算 ---
+
+    // 指定されているテクスチャの情報を取得（幅や高さを知るため）
+    const DirectX::TexMetadata& metadata =
+        TextureManager::GetInstance()->GetMetaData(textureIndex);
+
+    // ピクセル単位の指定を、UV座標（0.0～1.0）に変換する
+    float tex_left = textureLeftTop_.x / metadata.width;
+    float tex_right = (textureLeftTop_.x + textureSize_.x) / metadata.width;
+    float tex_top = textureLeftTop_.y / metadata.height;
+    float tex_bottom = (textureLeftTop_.y + textureSize_.y) / metadata.height;
+
+    // 頂点データ（TexCoord）に書き込む
+    vertexData_[0].texcoord = { tex_left, tex_bottom }; // 左下
+    vertexData_[1].texcoord = { tex_left, tex_top };    // 左上
+    vertexData_[2].texcoord = { tex_right, tex_bottom };// 右下
+    vertexData_[3].texcoord = { tex_right, tex_top };   // 右上
+
+
     // 行列更新処理を呼び出す
-    UpdateTransformationMatrix();
-
-
     transform_.translate = { position_.x,position_.y,0.0f };
 
     transform_.scale = { size_.x, size_.y, 1.0f };
+
+    UpdateTransformationMatrix();
 
     // TODO: 必要に応じて、マテリアルの色やUV情報などを更新するロジックを追加
 }
@@ -212,4 +267,17 @@ void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
     // 6. 描画! (DrawCall)
     // インデックス数 6, インスタンス数 1 で描画
     commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+}
+
+// [NEW] テクスチャサイズをイメージに合わせる
+void Sprite::AdjustTextureSize() {
+    // テクスチャメタデータを取得
+    const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+
+    // テクスチャサイズをスプライトのサイズに設定する
+    textureSize_.x = static_cast<float>(metadata.width);
+    textureSize_.y = static_cast<float>(metadata.height);
+
+    // 画像サイズをテクスチャサイズに合わせる
+    size_ = textureSize_;
 }
