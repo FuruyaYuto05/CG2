@@ -1,5 +1,4 @@
 #include "Sprite.h"
-// [NEW] SpriteCommon のポインタの定義と関数呼び出しのためにインクルード
 #include "SpriteCommon.h" 
 #include <cassert> // (ポインタチェックのために追加)
 #include "Math.h"
@@ -12,7 +11,7 @@
 // [FIX] Initialize の引数に SpriteCommon* を追加
 void Sprite::Initialize(SpriteCommon* spriteCommon, const std::string& textureFilePath)
 {
-    // [NEW] スライドの指示通り、引数で受け取ったポインタをメンバ変数に記録する
+    // スライドの指示通り、引数で受け取ったポインタをメンバ変数に記録する
     this->spriteCommon_ = spriteCommon;
 
     textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
@@ -22,10 +21,10 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, const std::string& textureFi
 
     CreateVertexData();
 
-    // [NEW] マテリアルデータ作成関数を呼び出す
+    // マテリアルデータ作成関数を呼び出す
     CreateMaterial();
 
-    // [NEW] 座標変換行列作成関数を呼び出す
+    // 座標変換行列作成関数を呼び出す
     CreateTransformationMatrix();
 
     AdjustTextureSize();
@@ -34,7 +33,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, const std::string& textureFi
 }
 
 // =============================================================
-// [NEW] 頂点データとバッファの生成
+// 頂点データとバッファの生成
 // =============================================================
 void Sprite::CreateVertexData() {
     ID3D12Device* device = spriteCommon_->GetDxCommon()->GetDevice();
@@ -94,7 +93,7 @@ void Sprite::CreateVertexData() {
 }
 
 // =============================================================
-// [NEW] マテリアルデータとバッファの生成
+// マテリアルデータとバッファの生成
 // =============================================================
 void Sprite::CreateMaterial() {
     // ID3D12Device* device = spriteCommon_->GetDxCommon()->GetDevice(); // デバイスはリソース作成関数内で使用されるため省略
@@ -114,7 +113,7 @@ void Sprite::CreateMaterial() {
 }
 
 // =============================================================
-// [NEW] 座標変換行列とバッファの生成
+// 座標変換行列とバッファの生成
 // =============================================================
 void Sprite::CreateTransformationMatrix() {
 
@@ -132,7 +131,7 @@ void Sprite::CreateTransformationMatrix() {
 
 
 // =============================================================
-// [NEW] 座標変換行列の更新
+//  座標変換行列の更新
 // =============================================================
 void Sprite::UpdateTransformationMatrix() {
     // TransformからWorldMatrixを作る
@@ -172,7 +171,7 @@ void Sprite::Update() {
     //    位置やサイズが変わる場合に、UpdateVertexData()を呼び出します。
 
 
-    // [NEW] アンカーポイントを使って、頂点の座標（0.0f～1.0fの範囲）をずらす
+    // アンカーポイントを使って、頂点の座標（0.0f～1.0fの範囲）をずらす
     float left = 0.0f - anchorPoint_.x;
     float right = 1.0f - anchorPoint_.x;
     float top = 0.0f - anchorPoint_.y;
@@ -191,7 +190,7 @@ void Sprite::Update() {
     }
 
 
-    // [NEW] 左右上下の座標を頂点データに書き込む
+    // 左右上下の座標を頂点データに書き込む
     // ※ vertexData_ は CreateVertexData() で Map してあるので、ここで書き込めばGPUに反映されます
 
     // 左下 (Index 0)
@@ -206,7 +205,7 @@ void Sprite::Update() {
     // 右上 (Index 3)
     vertexData_[3].position = { right, top, 0.0f, 1.0f };
 
-    // --- 2. [NEW] テクスチャ範囲指定（UV座標）の計算 ---
+    // --- 2.テクスチャ範囲指定（UV座標）の計算 ---
 
     // 指定されているテクスチャの情報を取得（幅や高さを知るため）
     const DirectX::TexMetadata& metadata =
@@ -236,7 +235,7 @@ void Sprite::Update() {
 }
 
 // =============================================================
-// [NEW] 描画処理 (Draw)
+// 描画処理 (Draw)
 // =============================================================
 void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
 
@@ -269,7 +268,7 @@ void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
     commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-// [NEW] テクスチャサイズをイメージに合わせる
+// テクスチャサイズをイメージに合わせる
 void Sprite::AdjustTextureSize() {
     // テクスチャメタデータを取得
     const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);

@@ -17,16 +17,16 @@ public:
     uint32_t textureIndex = 0;
 
     // 初期化
-    // [FIX] SpriteCommon* を引数として受け取る
+    // SpriteCommon* を引数として受け取る
     void Initialize(SpriteCommon* spriteCommon, const std::string& textureFilePath);
 
     void Update();
 
-    // [確認] 描画処理メソッド
+    // 描画処理メソッド
     void Draw(ID3D12GraphicsCommandList* commandList);
 
 
-    // [NEW] 座標の Getter と Setter を追加
+    // 座標の Getter と Setter を追加
 
     /// <summary>
     /// 座標のGetter
@@ -72,7 +72,7 @@ public:
     /// </summary>
     void SetColor(const Math::Vector4& color) { this->materialData_->color = color; }
 
-    // [NEW] サイズ (Size) の Getter と Setter を追加
+    // サイズ (Size) の Getter と Setter を追加
 /// <summary>
 /// サイズのGetter
 /// </summary>
@@ -83,26 +83,26 @@ public:
     /// </summary>
     void SetSize(const Math::Vector2& size) { this->size_ = size; }
 
-    // [NEW] アンカーポイントのGetter
+    // アンカーポイントのGetter
     const Math::Vector2& GetAnchorPoint() const { return anchorPoint_; }
 
-    // [NEW] アンカーポイントのSetter
+    // アンカーポイントのSetter
     void SetAnchorPoint(const Math::Vector2& anchorPoint) { this->anchorPoint_ = anchorPoint; }
 
-    // [NEW] 左右フリップのGetter/Setter
+    // 左右フリップのGetter/Setter
     bool GetFlipX() const { return isFlipX_; }
     void SetFlipX(bool isFlipX) { isFlipX_ = isFlipX; }
 
-    // [NEW] 上下フリップのGetter/Setter
+    // 上下フリップのGetter/Setter
     bool GetFlipY() const { return isFlipY_; }
     void SetFlipY(bool isFlipY) { isFlipY_ = isFlipY; }
 
 
-    // [NEW] テクスチャ左上座標のGetter/Setter
+    // テクスチャ左上座標のGetter/Setter
     const Math::Vector2& GetTextureLeftTop() const { return textureLeftTop_; }
     void SetTextureLeftTop(const Math::Vector2& textureLeftTop) { textureLeftTop_ = textureLeftTop; }
 
-    // [NEW] テクスチャ切り出しサイズのGetter/Setter
+    // テクスチャ切り出しサイズのGetter/Setter
     const Math::Vector2& GetTextureSize() const { return textureSize_; }
     void SetTextureSize(const Math::Vector2& textureSize) { textureSize_ = textureSize; }
 
@@ -117,7 +117,7 @@ private:
         Math::Vector3 normal; // スライドの指示通り、一旦normalも含めておく
     };
 
-    // [NEW] 頂点データ (メンバ変数)
+    // 頂点データ (メンバ変数)
 
     // バッファリソース
     Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;   // VertexBuffer
@@ -134,7 +134,7 @@ private:
     void CreateVertexData();
 
 
-    // [NEW] マテリアルデータ
+    // マテリアルデータ
     struct Material {
         Math::Vector4 color;             // 色情報 (Vector4)
         int32_t enableLighting;          // ライティング有効/無効フラグ (int32_t)
@@ -142,7 +142,7 @@ private:
         Math::Matrix4x4 uvTransform;     // UV変換行列 (Matrix4x4)
     };
 
-    // [NEW] マテリアル (メンバ変数)
+    // マテリアル (メンバ変数)
 
     // バッファリソース (ConstantBuffer)
     Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
@@ -151,12 +151,12 @@ private:
     Material* materialData_ = nullptr;
 
 
-    // [NEW] マテリアルデータとバッファの生成を担うプライベートメソッド
+    // マテリアルデータとバッファの生成を担うプライベートメソッド
     void CreateMaterial();
 
 
 
-    // [NEW] 座標変換行列データ
+    // 座標変換行列データ
     struct TransformationMatrix {
         Math::Matrix4x4 WVP;    // World View Projection Matrix
         Math::Matrix4x4 World;  // World Matrix
@@ -173,37 +173,37 @@ private:
     // トランスフォーム情報
     Math::Transform transform_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
-    // [NEW] 座標変換行列とバッファの生成を担うプライベートメソッド
+    // 座標変換行列とバッファの生成を担うプライベートメソッド
     void CreateTransformationMatrix();
 
-    // [NEW] 行列更新処理をカプセル化するためのプライベートメソッド
+    // 行列更新処理をカプセル化するためのプライベートメソッド
     void UpdateTransformationMatrix();
 
 
-    // [NEW] 座標をメンバ変数として保持 (Vector2)
+    // 座標をメンバ変数として保持 (Vector2)
     Math::Vector2 position_ = { 500.0f, 400.0f }; 
 
     float rotation = 0.0f;
 
-    // [NEW] サイズをメンバ変数として保持 (Vector2)
+    // サイズをメンバ変数として保持 (Vector2)
     Math::Vector2 size_ = { 100.0f, 100.0f };
 
-    // [NEW] アンカーポイントをメンバ変数として保持 (初期値は左上の 0.0f, 0.0f)
+    // アンカーポイントをメンバ変数として保持 (初期値は左上の 0.0f, 0.0f)
     Math::Vector2 anchorPoint_ = { 0.5f, 0.5f };
 
-    // [NEW] 左右フリップ
+    // 左右フリップ
     bool isFlipX_ = false;
-    // [NEW] 上下フリップ
+    // 上下フリップ
     bool isFlipY_ = false;
 
 
-    // [NEW] テクスチャ左上座標
+    // テクスチャ左上座標
     Math::Vector2 textureLeftTop_ = { 0.0f, 0.0f };
 
-    // [NEW] テクスチャ切り出しサイズ
+    // テクスチャ切り出しサイズ
     Math::Vector2 textureSize_ = { 512.0f, 512.0f };
 
-    // [NEW] テクスチャサイズをイメージに合わせる
+    //  テクスチャサイズをイメージに合わせる
     void AdjustTextureSize();
 
 };

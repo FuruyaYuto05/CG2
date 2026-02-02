@@ -21,8 +21,7 @@ private:
     // ★ SRVインデックスの開始番号（ImGuiが0番を使うので1から）
     static uint32_t kSRVIndexTop;
 
-private:
-    // DirectXCommon を保持
+
     DirectXCommon* dxCommon_ = nullptr;
 
     struct TextureData {
@@ -48,6 +47,6 @@ public:
 
     D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(uint32_t textureIndex);
 
-    // [NEW] メタデータを取得
+    // メタデータを取得
     const DirectX::TexMetadata& GetMetaData(uint32_t textureIndex);
 };

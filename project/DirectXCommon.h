@@ -89,28 +89,28 @@ private:
 
 	// --- DirectX 基盤オブジェクト (ComPtr へ変更) ---
 	
-	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_;  //  ComPtrへ変更
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_;  
 	
-	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter_;   //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<ID3D12Device> device_;       //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue_; //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator_; //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList_; //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_; //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources_[2]; //  ComPtrへ変更
+	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter_;   
+	Microsoft::WRL::ComPtr<ID3D12Device> device_;       
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue_; 
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator_; 
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList_; 
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_; 
+	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources_[2]; 
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_; //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_; //  ComPtrへ変更
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_; 
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_; 
 
 	// --- Fence (ComPtr へ変更) ---
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence_; //  ComPtrへ変更
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence_; 
 	uint64_t fenceValue_ = 0;
 	HANDLE fenceEvent_ = nullptr;
 
 	// --- DXCompiler (ComPtr へ変更) ---
-	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_; //  ComPtrへ変更
-	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_; // ComPtrへ変更
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_; //  ComPtrへ変更
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_; 
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_; 
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_; 
 
 	// --- RTV Handles (生ポインタのまま) ---
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles_[2];

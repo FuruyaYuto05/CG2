@@ -1,6 +1,6 @@
 #include "DirectXCommon.h"
-#include "WinApp.h" // スワップチェーン生成で必要
-#include <string>// Log, ConvertString等で必要
+#include "WinApp.h" 
+#include <string>
 #include <format>
 #include <Windows.h>
 #include <cassert>
@@ -706,9 +706,7 @@ void DirectXCommon::PostDraw()
 	// FPS固定
 	UpdateFixFPS();
 
-	// ❌ コマンドアロケータとコマンドリストのリセットは PostDraw に含めず、
-	// 描画開始時 (PreDraw) で行うのが一般的であるため、ここでは含めません。
-	// PreDraw にて Reset() を行う実装は既に完了しています。
+	
 }
 
 

@@ -142,7 +142,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureInde
     return textureData.srvHandleGPU;
 }
 
-// [NEW] メタデータを取得
+// メタデータを取得
 const DirectX::TexMetadata& TextureManager::GetMetaData(uint32_t textureIndex)
 {
     // 範囲外指定違反チェック

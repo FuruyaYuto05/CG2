@@ -18,8 +18,8 @@ public:
     void SetCommonDrawSettings(ID3D12GraphicsCommandList* commandList);
 
     // アクセサ
-    ID3D12RootSignature* GetRootSignature() const { return rootSignature_.Get(); }       // [NEW]
-    ID3D12PipelineState* GetPipelineState() const { return graphicsPipelineState_.Get(); } // [NEW]
+    ID3D12RootSignature* GetRootSignature() const { return rootSignature_.Get(); }      
+    ID3D12PipelineState* GetPipelineState() const { return graphicsPipelineState_.Get(); } 
 
     // DirectXCommonのポインタを返すGetterを追加
     DirectXCommon* GetDxCommon() const { return dxCommon_; }
@@ -28,7 +28,7 @@ private:
 
     DirectXCommon* dxCommon_;
 
-    // [NEW] メンバ変数の追加
+    // メンバ変数の追加
     // ルートシグネチャ
     Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
     // グラフィックスパイプラインステート
