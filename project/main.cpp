@@ -1309,6 +1309,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// --- 描画前処理 ---
 			dxCommon->PreDraw();
 
+			// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
+			object3dCommon->SetCommonDrawSetting();
+
+			// Todo: 全てのObject3d個々の描画
+
+
 			////これから書き込むバックバッファのインデックスを取得
 			//UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
