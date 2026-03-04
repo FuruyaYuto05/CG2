@@ -655,7 +655,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Object3dCommon* object3dCommon = nullptr;
 	// 3Dオブジェクト共通部の初期化
 	object3dCommon = new Object3dCommon();
-	object3dCommon->Initialize();
+	object3dCommon->Initialize(dxCommon);
 
 
 	////DXGIファクトリーの作成
@@ -1195,7 +1195,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 
 	Object3d* object3d = new Object3d();
-	object3d->Initialize();
+	object3d->Initialize(object3dCommon);
 
 
 	//ウィンドウの×ボタンが押されるまでループ
@@ -1210,6 +1210,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//入力の更新  <= ❌ 初期化時に一度だけ呼ばれている
 			input->Update();
 
+			object3d->Update();
 
 			if (input->Pushkey(DIK_0)) {
 				OutputDebugStringA("Hit 0\n");
@@ -1311,6 +1312,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
 			object3dCommon->SetCommonDrawSetting();
+
+			object3d->Draw();
 
 			// Todo: 全てのObject3d個々の描画
 
