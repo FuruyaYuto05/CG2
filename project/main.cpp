@@ -25,6 +25,9 @@
 #include "Sprite.h"
 #include "Math.h"
 #include "TextureManager.h"
+#include "Object3dCommon.h"
+#include "Object3d.h"
+
 
 using namespace Microsoft::WRL;
 
@@ -648,6 +651,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
+
+	Object3dCommon* object3dCommon = nullptr;
+	// 3Dオブジェクト共通部の初期化
+	object3dCommon = new Object3dCommon();
+	object3dCommon->Initialize();
+
+
 	////DXGIファクトリーの作成
 	IDXGIFactory7* dxgiFactory = nullptr;
 	////HRESULTはWindows刑のエラーコードであり、
@@ -1184,6 +1194,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
 	
 
+	Object3d* object3d = new Object3d();
+	object3d->Initialize();
+
 
 	//ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -1425,6 +1438,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
+	delete object3d;
+
 	delete sprite;
 
 	delete input;
@@ -1483,6 +1498,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			delete sprite; // newしたオブジェクトを解放
 		}
 	}
+
+	delete object3dCommon;
 
 	//windowsAPIの終了処理
 	winApp->Finalize();
