@@ -11,6 +11,7 @@
 
 // 前方宣言
 class Object3dCommon;
+class Model;
 
 // 3Dオブジェクト
 class Object3d
@@ -60,33 +61,37 @@ public: // メンバ関数
     void Update();
     void Draw();
 
+    void SetModel(Model* model) { model_ = model; }
+
     // .mtlファイルの読み取り
-    static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
+    //static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 
     // .objファイルの読み取り
-    void LoadObjFile(const std::string& directoryPath, const std::string& filename);
+    //void LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
     
 
 private: // メンバ変数
     Object3dCommon* object3dCommon = nullptr;
 
+    Model* model_ = nullptr;
+
     Math::Transform transform;
     Math::Transform cameraTransform;
 
     // 読み込んだモデルデータを保持する変数
-    ModelData modelData;
+    //ModelData modelData;
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+    //Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
 
-    // バッファリソース内のデータを指すポインタ
-    VertexData* vertexData = nullptr;
+    //// バッファリソース内のデータを指すポインタ
+    //VertexData* vertexData = nullptr;
 
-    // バッファリソースの使い道を補足するバッファビュー
-    D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+    //// バッファリソースの使い道を補足するバッファビュー
+    //D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-    Material* materialData = nullptr;
+    //Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+    //Material* materialData = nullptr;
 
     Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;
     TransformationMatrix* transformationMatrixData = nullptr;
@@ -95,12 +100,23 @@ private: // メンバ変数
     DirectionalLight* directionalLightData = nullptr;
 
 
-    // 頂点データ作成
-    void CreateVertexData();
-    // マテリアルデータの作成
-    void CreateMaterialData();
+    //// 頂点データ作成
+    //void CreateVertexData();
+    //// マテリアルデータの作成
+    //void CreateMaterialData();
 
     void CreateTransformationMatrixData();
 
     void CreateDirectionalLightData();
+
+public:
+    // --- 追加：setter ---
+    void SetScale(const Math::Vector3& scale) { transform.scale = scale; }
+    void SetRotate(const Math::Vector3& rotate) { transform.rotate = rotate; }
+    void SetTranslate(const Math::Vector3& translate) { transform.translate = translate; }
+
+    // --- 追加：getter ---
+    const Math::Vector3& GetScale() const { return transform.scale; }
+    const Math::Vector3& GetRotate() const { return transform.rotate; }
+    const Math::Vector3& GetTranslate() const { return transform.translate; }
 };
