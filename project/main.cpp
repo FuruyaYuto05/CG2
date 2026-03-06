@@ -1211,13 +1211,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3d_1->Initialize(object3dCommon);
 	object3d_1->SetModel("plane.obj"); // 新しく作った文字列版の SetModel を使用
 	object3d_1->SetTranslate({ -2.0f, 0.0f, 0.0f }); // 少し左にずらす
+	object3d_1->SetRotate({ 0.0f, 3.14f, 0.0f });
 
 	// 2体目のオブジェクト（右側）
 	Object3d* object3d_2 = new Object3d();
 	object3d_2->Initialize(object3dCommon);
 	object3d_2->SetModel("axis.obj"); // 同じモデルデータを使い回す！
 	object3d_2->SetTranslate({ 2.0f, 0.0f, 0.0f }); // 少し右にずらす
-
+	object3d_2->SetRotate({ 0.0f, 0.0f, 0.0f });
 
 	//ウィンドウの×ボタンが押されるまでループ
 	while (true) {
@@ -1327,6 +1328,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sprite->SetSize(currentSize);
 			}
 
+			ImGui::Text("--- 3D Object ---");
+
+			// 現在の3Dオブジェクトの位置を取得
+			Math::Vector3 planeobjPos = object3d_1->GetTranslate();
+
+			Math::Vector3 axisobjPos = object3d_2->GetTranslate();
+
+			// DragFloat3 を使って、X, Y, Z の3つの値を操作できるようにする
+			if (ImGui::DragFloat3("Planeobj Position", &planeobjPos.x, 0.1f)) {
+				// 操作されたら、新しい位置をセットし直す
+				object3d_1->SetTranslate(planeobjPos);
+			}
+			// 回転の操作
+			Math::Vector3 planeobjRot = object3d_1->GetRotate();
+			if (ImGui::DragFloat3("Planeobj Rotation", &planeobjRot.x, 0.01f)) {
+				object3d_1->SetRotate(planeobjRot);
+			}
+
+			if (ImGui::DragFloat3("axisobj Position", &axisobjPos.x, 0.1f)) {
+				// 操作されたら、新しい位置をセットし直す
+				object3d_2->SetTranslate(axisobjPos);
+			}
+			Math::Vector3 axisobjRot = object3d_1->GetRotate();
+			if (ImGui::DragFloat3("axisobj Rotation", &axisobjRot.x, 0.01f)) {
+				object3d_2->SetRotate(axisobjRot);
+			}
+
 			ImGui::End();
 
 			//ImGuiの内部コマンド生成
@@ -1418,7 +1446,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			sprite->Draw(dxCommon->GetCommandList());
 
 			// 2. 個別スプライトの描画
-            // vector の要素を一つずつ取り出し、Drawを呼び出す
+   //        vector の要素を一つずつ取り出し、Drawを呼び出す
 			for (Sprite* sprite : sprites) {
 				sprite->Draw(dxCommon->GetCommandList());
 			}
