@@ -63,6 +63,8 @@ public: // メンバ関数
 
     void SetModel(Model* model) { model_ = model; }
 
+    void SetModel(const std::string& filePath);
+
     // .mtlファイルの読み取り
     //static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 

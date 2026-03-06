@@ -54,6 +54,7 @@ private: // メンバ変数
 
 public: // メンバ関数
     // 初期化
+    // Model.h
     void Initialize(ModelCommon* modelCommon, const std::string& directoryPath, const std::string& filename);
 
     void Draw();

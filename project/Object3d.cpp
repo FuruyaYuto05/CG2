@@ -6,7 +6,7 @@
 #include "DirectXCommon.h"
 #include "TextureManager.h"
 #include "Model.h"
-
+#include "ModelManager.h"
 
 void Object3d::Initialize(Object3dCommon* object3dCommon)
 {
@@ -228,4 +228,8 @@ void Object3d::Draw() {
     //// 6. 描画！ (DrawCall)
     //commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
+}
+
+void Object3d::SetModel(const std::string& filePath) {
+    model_ = ModelManager::GetInstance()->FindModel(filePath);
 }

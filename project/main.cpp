@@ -27,6 +27,7 @@
 #include "TextureManager.h"
 #include "Object3dCommon.h"
 #include "Object3d.h"
+#include "ModelManager.h"
 
 
 using namespace Microsoft::WRL;
@@ -1193,9 +1194,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// Initialize()に SpriteCommon などの必要な情報を渡す想定
 	sprite->Initialize(spriteCommon, "resources/uvChecker.png");
 	
+	// 1. DirectXCommonの初期化のあと、TextureManagerなどの後が良いです
+	ModelManager::GetInstance()->Initialize(dxCommon);
 
-	Object3d* object3d = new Object3d();
-	object3d->Initialize(object3dCommon);
+	// 2. ここでモデルをロードします（ファイルパスを指定）
+	// これにより、ModelManager内の map にモデルデータが保管されます
+	ModelManager::GetInstance()->LoadModel("plane.obj");
+	// 他のモデルを使う場合はここに追加します
+    ModelManager::GetInstance()->LoadModel("axis.obj");
+
+	//Object3d* object3d = new Object3d();
+	//object3d->Initialize(object3dCommon);
+
+	// 1体目のオブジェクト（左側）
+	Object3d* object3d_1 = new Object3d();
+	object3d_1->Initialize(object3dCommon);
+	object3d_1->SetModel("plane.obj"); // 新しく作った文字列版の SetModel を使用
+	object3d_1->SetTranslate({ -2.0f, 0.0f, 0.0f }); // 少し左にずらす
+
+	// 2体目のオブジェクト（右側）
+	Object3d* object3d_2 = new Object3d();
+	object3d_2->Initialize(object3dCommon);
+	object3d_2->SetModel("axis.obj"); // 同じモデルデータを使い回す！
+	object3d_2->SetTranslate({ 2.0f, 0.0f, 0.0f }); // 少し右にずらす
 
 
 	//ウィンドウの×ボタンが押されるまでループ
@@ -1210,7 +1231,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//入力の更新  <= ❌ 初期化時に一度だけ呼ばれている
 			input->Update();
 
-			object3d->Update();
+			//object3d->Update();
+
+			// 更新
+			object3d_1->Update();
+			object3d_2->Update();
 
 			if (input->Pushkey(DIK_0)) {
 				OutputDebugStringA("Hit 0\n");
@@ -1313,7 +1338,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
 			object3dCommon->SetCommonDrawSetting();
 
-			object3d->Draw();
+			//object3d->Draw();
+
+			// 描画
+			object3d_1->Draw();
+			object3d_2->Draw();
 
 			// Todo: 全てのObject3d個々の描画
 
@@ -1447,7 +1476,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
-	delete object3d;
+	//delete object3d;
+
+	delete object3d_1;
+	delete object3d_2;
 
 	delete sprite;
 
@@ -1509,6 +1541,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	delete object3dCommon;
+
+	ModelManager::GetInstance()->Finalize();
 
 	//windowsAPIの終了処理
 	winApp->Finalize();
