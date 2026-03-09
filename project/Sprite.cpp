@@ -14,7 +14,8 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, const std::string& textureFi
     // スライドの指示通り、引数で受け取ったポインタをメンバ変数に記録する
     this->spriteCommon_ = spriteCommon;
 
-    textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+   // textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+    textureFilePath_ = textureFilePath;
 
     // ポインタが有効か確認
     assert(this->spriteCommon_ != nullptr);
@@ -208,8 +209,9 @@ void Sprite::Update() {
     // --- 2.テクスチャ範囲指定（UV座標）の計算 ---
 
     // 指定されているテクスチャの情報を取得（幅や高さを知るため）
+  // --- ★変更：textureIndex を textureFilePath_ に変える ---
     const DirectX::TexMetadata& metadata =
-        TextureManager::GetInstance()->GetMetaData(textureIndex);
+        TextureManager::GetInstance()->GetMetaData(textureFilePath_);
 
     // ピクセル単位の指定を、UV座標（0.0～1.0）に変換する
     float tex_left = textureLeftTop_.x / metadata.width;
@@ -258,7 +260,8 @@ void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
     //    ⇒ 正確には、SRVのヒープ自体は SetCommonDrawSettings でセット済みなので、ここでは個別の SRV のハンドルを設定します。
     // commandList->SetGraphicsRootDescriptorTable(2, spriteCommon_->GetSRVGPUDescriptorHandle(0)); // GetSRVGPUDescriptorHandle は仮のメソッド
 
-    commandList->SetGraphicsRootDescriptorTable(2,TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
+   // --- ★変更：textureIndex を textureFilePath_ に変える ---
+    commandList->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureFilePath_));
     // ToDo: SRVハンドルの取得ロジックが必要だが、今回は main.cpp の描画コマンドをそのまま移植し、
     //      テクスチャアトラスを考慮しない暫定的なコードとする。
     //      main.cpp で使われていた D3D12_GPU_DESCRIPTOR_HANDLE を直接参照できないため、一旦この行は保留し、DrawCallに進みます。
@@ -271,7 +274,8 @@ void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
 // テクスチャサイズをイメージに合わせる
 void Sprite::AdjustTextureSize() {
     // テクスチャメタデータを取得
-    const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+   // --- ★変更：textureIndex を textureFilePath_ に変える ---
+    const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureFilePath_);;
 
     // テクスチャサイズをスプライトのサイズに設定する
     textureSize_.x = static_cast<float>(metadata.width);

@@ -15,7 +15,7 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directoryPat
     // テクスチャ読み込みと番号取得
     TextureManager::GetInstance()->LoadTexture(modelData_.material.textureFilePath);
     modelData_.material.textureIndex =
-        TextureManager::GetInstance()->GetTextureIndexByFilePath(modelData_.material.textureFilePath);
+        TextureManager::GetInstance()->GetSrvIndex(modelData_.material.textureFilePath); // ← ★ここを直す！
 
     // 頂点とマテリアルのデータ作成
     CreateVertexData();
@@ -56,7 +56,8 @@ void Model::Draw() {
     commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 
     // 3. テクスチャ（SRV）の設定
-    commandList->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData_.material.textureIndex));
+    commandList->SetGraphicsRootDescriptorTable(2, // textureIndex（数字）ではなく、textureFilePath（文字）を渡す！
+        TextureManager::GetInstance()->GetSrvHandleGPU(modelData_.material.textureFilePath));
 
     // 4. 描画コマンド (DrawCall)
     commandList->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);

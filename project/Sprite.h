@@ -14,8 +14,8 @@ class Sprite
 {
 public:
 
-    uint32_t textureIndex = 0;
-
+   // uint32_t textureIndex = 0;
+    std::string textureFilePath_;
     // 初期化
     // SpriteCommon* を引数として受け取る
     void Initialize(SpriteCommon* spriteCommon, const std::string& textureFilePath);

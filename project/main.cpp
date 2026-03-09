@@ -29,11 +29,11 @@
 #include "Object3d.h"
 #include "ModelManager.h"
 #include "Camera.h"
-
+#include "SrvManager.h"
 
 using namespace Microsoft::WRL;
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 #pragma comment(lib,"dxcompiler.lib")
@@ -46,9 +46,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 //ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 	WPARAM wparam, LPARAM lparam) {
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
+	/*if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
 		return true;
-	}
+	}*/
 
 	//メッセージに応じてゲーム固有の処理を行う
 	switch (msg) {
@@ -641,12 +641,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon = new DirectXCommon(); 
 	dxCommon->Initialize(winApp);        
 
-	TextureManager::GetInstance()->SetDirectXCommon(dxCommon);
+	SrvManager* srvManager = nullptr;
+	srvManager = new SrvManager();
+	srvManager->Initialize(dxCommon);
 
+	TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
+
+	// その後で画像を読み込む
 	TextureManager::GetInstance()->LoadTexture("resources/uvChecker.png");
 	TextureManager::GetInstance()->LoadTexture("monsterBall.png");
 
-	TextureManager::GetInstance()->Initialize();
+	
 
 	SpriteCommon* spriteCommon = nullptr;
 	//スプライト共通部の初期化
@@ -1270,9 +1275,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldViewProjectionMatrixSprite = Math::Multiply(worldMatrixSprite, Math::Multiply(viewMatrixSprite, projectionMatrixSprite));
 			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;*/
 
-			ImGui_ImplDX12_NewFrame();
+		/*	ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
-			ImGui::NewFrame();
+			ImGui::NewFrame();*/
 
 			//transform.rotate.y += 0.03f;
 		/*	Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
@@ -1287,9 +1292,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//開発用UIの処理
-			ImGui::ShowDemoWindow();
+			//ImGui::ShowDemoWindow();
 
-			ImGui::Begin("Settings");
+			//ImGui::Begin("Settings");
 			//ImGui::ColorEdit4("material", &materialData->x, ImGuiColorEditFlags_AlphaPreview);
 			
 			//ImGui::DragFloat3("Object rotate.y", &transform.rotate.x, 0.1f);
@@ -1301,88 +1306,90 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::DragFloat3("Sprite scale", &transformSprite.scale.x, 0.1f);
 			
 			// 1. 現在の位置を取得
-			Math::Vector2 currentPos = sprite->GetPosition();
-			Math::Vector3 currentRot = sprite->GetRotation();
+			//Math::Vector2 currentPos = sprite->GetPosition();
+			//Math::Vector3 currentRot = sprite->GetRotation();
 			
-			Math::Vector2 currentSize = sprite->GetSize();
+			//Math::Vector2 currentSize = sprite->GetSize();
 
-			// 2. DragFloat2 で編集（ここでは Vector3ではなく Vector2 が適切）
-			// ImGui::DragFloat2 を使って位置を編集します。
-			if (ImGui::DragFloat2("Position", &currentPos.x, 1.0f))
-			{
-				// 3. 編集された値を Setter で設定
-				sprite->SetPosition(currentPos);
-			}
+			//// 2. DragFloat2 で編集（ここでは Vector3ではなく Vector2 が適切）
+			//// ImGui::DragFloat2 を使って位置を編集します。
+			//if (ImGui::DragFloat2("Position", &currentPos.x, 1.0f))
+			//{
+			//	// 3. 編集された値を Setter で設定
+			//	sprite->SetPosition(currentPos);
+			//}
 
 
-			// --- Rotation (Vector3) ---
-			if (ImGui::DragFloat3("Rotation", &currentRot.x, 0.01f)) {
-				// [FIX] Vector3 の変数を Setter に渡す
-				sprite->SetRotation(currentRot);
-			}
+			//// --- Rotation (Vector3) ---
+			//if (ImGui::DragFloat3("Rotation", &currentRot.x, 0.01f)) {
+			//	// [FIX] Vector3 の変数を Setter に渡す
+			//	sprite->SetRotation(currentRot);
+			//}
 
-			// [NEW] Color の Getter/Setter を使った ImGui ウィジェットを追加
-			Math::Vector4 currentColor = sprite->GetColor();
+			//// [NEW] Color の Getter/Setter を使った ImGui ウィジェットを追加
+			//Math::Vector4 currentColor = sprite->GetColor();
 
-			// DragFloat4 ではなく ColorEdit4 を使うことで、カラーピッカーが表示される
-			if (ImGui::ColorEdit4("Color", &currentColor.x, ImGuiColorEditFlags_AlphaPreview)) {
-				// 編集された値を Setter で設定
-				sprite->SetColor(currentColor);
-			}
+			//// DragFloat4 ではなく ColorEdit4 を使うことで、カラーピッカーが表示される
+			//if (ImGui::ColorEdit4("Color", &currentColor.x, ImGuiColorEditFlags_AlphaPreview)) {
+			//	// 編集された値を Setter で設定
+			//	sprite->SetColor(currentColor);
+			//}
 
-			if (ImGui::DragFloat2("Size", &currentSize.x, 0.1f, 0.1f, 1000.0f)) // 1.0f 単位で、最小 1.0f までの制限
-			{
-				sprite->SetSize(currentSize);
-			}
+			//if (ImGui::DragFloat2("Size", &currentSize.x, 0.1f, 0.1f, 1000.0f)) // 1.0f 単位で、最小 1.0f までの制限
+			//{
+			//	sprite->SetSize(currentSize);
+			//}
 
-			ImGui::Text("--- 3D Object ---");
+			//ImGui::Text("--- 3D Object ---");
 
-			// 現在の3Dオブジェクトの位置を取得
-			Math::Vector3 planeobjPos = object3d_1->GetTranslate();
+			//// 現在の3Dオブジェクトの位置を取得
+			//Math::Vector3 planeobjPos = object3d_1->GetTranslate();
 
-			Math::Vector3 axisobjPos = object3d_2->GetTranslate();
+			//Math::Vector3 axisobjPos = object3d_2->GetTranslate();
 
-			// DragFloat3 を使って、X, Y, Z の3つの値を操作できるようにする
-			if (ImGui::DragFloat3("Planeobj Position", &planeobjPos.x, 0.1f)) {
-				// 操作されたら、新しい位置をセットし直す
-				object3d_1->SetTranslate(planeobjPos);
-			}
-			// 回転の操作
-			Math::Vector3 planeobjRot = object3d_1->GetRotate();
-			if (ImGui::DragFloat3("Planeobj Rotation", &planeobjRot.x, 0.01f)) {
-				object3d_1->SetRotate(planeobjRot);
-			}
+			//// DragFloat3 を使って、X, Y, Z の3つの値を操作できるようにする
+			//if (ImGui::DragFloat3("Planeobj Position", &planeobjPos.x, 0.1f)) {
+			//	// 操作されたら、新しい位置をセットし直す
+			//	object3d_1->SetTranslate(planeobjPos);
+			//}
+			//// 回転の操作
+			//Math::Vector3 planeobjRot = object3d_1->GetRotate();
+			//if (ImGui::DragFloat3("Planeobj Rotation", &planeobjRot.x, 0.01f)) {
+			//	object3d_1->SetRotate(planeobjRot);
+			//}
 
-			if (ImGui::DragFloat3("axisobj Position", &axisobjPos.x, 0.1f)) {
-				// 操作されたら、新しい位置をセットし直す
-				object3d_2->SetTranslate(axisobjPos);
-			}
-			Math::Vector3 axisobjRot = object3d_1->GetRotate();
-			if (ImGui::DragFloat3("axisobj Rotation", &axisobjRot.x, 0.01f)) {
-				object3d_2->SetRotate(axisobjRot);
-			}
+			//if (ImGui::DragFloat3("axisobj Position", &axisobjPos.x, 0.1f)) {
+			//	// 操作されたら、新しい位置をセットし直す
+			//	object3d_2->SetTranslate(axisobjPos);
+			//}
+			//Math::Vector3 axisobjRot = object3d_1->GetRotate();
+			//if (ImGui::DragFloat3("axisobj Rotation", &axisobjRot.x, 0.01f)) {
+			//	object3d_2->SetRotate(axisobjRot);
+			//}
 
-			ImGui::Text("--- Camera ---");
+			//ImGui::Text("--- Camera ---");
 
-			// カメラの現在の位置を取得して、ImGuiで操作できるようにする
-			Math::Vector3 cameraPos = camera->GetTranslate();
-			if (ImGui::DragFloat3("Camera Position", &cameraPos.x, 0.1f)) {
-				camera->SetTranslate(cameraPos);
-			}
+			//// カメラの現在の位置を取得して、ImGuiで操作できるようにする
+			//Math::Vector3 cameraPos = camera->GetTranslate();
+			//if (ImGui::DragFloat3("Camera Position", &cameraPos.x, 0.1f)) {
+			//	camera->SetTranslate(cameraPos);
+			//}
 
-			// カメラの現在の角度を取得して、ImGuiで操作できるようにする
-			Math::Vector3 cameraRot = camera->GetRotate();
-			if (ImGui::DragFloat3("Camera Rotation", &cameraRot.x, 0.01f)) {
-				camera->SetRotate(cameraRot);
-			}
+			//// カメラの現在の角度を取得して、ImGuiで操作できるようにする
+			//Math::Vector3 cameraRot = camera->GetRotate();
+			//if (ImGui::DragFloat3("Camera Rotation", &cameraRot.x, 0.01f)) {
+			//	camera->SetRotate(cameraRot);
+			//}
 
-			ImGui::End();
+			//ImGui::End();
 
-			//ImGuiの内部コマンド生成
-			ImGui::Render();
+			////ImGuiの内部コマンド生成
+			//ImGui::Render();
 
 			// --- 描画前処理 ---
 			dxCommon->PreDraw();
+
+			srvManager->PreDraw();
 
 			// 3Dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
 			object3dCommon->SetCommonDrawSetting();
@@ -1481,7 +1488,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			
 
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+			//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
 
 			//barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			//barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1536,12 +1543,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	delete input;
 
+	delete srvManager;
 
 	
 
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
+	//ImGui_ImplDX12_Shutdown();
+	//ImGui_ImplWin32_Shutdown();
+	//ImGui::DestroyContext();
 
 	//indexResourceSprite->Release();
 

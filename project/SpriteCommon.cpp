@@ -152,6 +152,8 @@ void SpriteCommon::Initialize(DirectXCommon* dxCommon)
 
     // グラフィックスパイプラインの生成を呼び出す
     CreateGraphicsPipelineState();
+
+
 }
 
 

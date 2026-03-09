@@ -1,0 +1,103 @@
+#include "SrvManager.h"
+#include "DirectXCommon.h" 
+#include <cassert> // ← ★これを追加（assertを使うため）
+
+const uint32_t SrvManager::kMaxSRVCount = 512;
+
+void SrvManager::Initialize(DirectXCommon* dxCommon)
+{
+    // 引数で受け取ってメンバ変数に記録する
+    this->directXCommon = dxCommon;
+
+    // デスクリプタヒープの生成
+    descriptorHeap = directXCommon->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
+
+    // デスクリプタ1個分のサイズを取得して記録
+    descriptorSize = directXCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+}
+
+// --- ★ここから追加（スライド通り） ---
+uint32_t SrvManager::Allocate()
+{
+    // 上限に達していないかチェックしてアサート（512個を超えようとしたらここでプログラムを止める）
+    assert(useIndex < kMaxSRVCount);
+
+    // returnする番号を一旦記録しておく
+    // （スライドはintですが、符号なしの uint32_t にしておく方が警告が出ず綺麗です）
+    uint32_t index = useIndex;
+
+    // 次回のために番号を1進める
+    useIndex++;
+
+    // 上で記録した番号をreturn
+    return index;
+}
+// --- 追加ここまで ---
+
+// CPUハンドルの取得
+D3D12_CPU_DESCRIPTOR_HANDLE SrvManager::GetCPUDescriptorHandle(uint32_t index)
+{
+    D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+    handleCPU.ptr += (descriptorSize * index);
+    return handleCPU;
+}
+
+// GPUハンドルの取得（スライドには無いですが、CPUと同じ要領で書きます）
+D3D12_GPU_DESCRIPTOR_HANDLE SrvManager::GetGPUDescriptorHandle(uint32_t index)
+{
+    D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
+    handleGPU.ptr += (descriptorSize * index);
+    return handleGPU;
+}
+
+// SRV生成 (テクスチャ用)
+void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, ID3D12Resource* pResource, DXGI_FORMAT Format, UINT MipLevels)
+{
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+
+    // srvDescの各項目を埋める（今までmain.cppで書いていた設定です）
+    srvDesc.Format = Format;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = MipLevels;
+
+    // SRVの生成
+    directXCommon->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
+}
+
+// SRV生成 (Structured Buffer用)
+void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride)
+{
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+
+    // Structured Buffer用の設定（FormatをUNKNOWNにするのがルールです）
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+    srvDesc.Buffer.FirstElement = 0;
+    srvDesc.Buffer.NumElements = numElements;
+    srvDesc.Buffer.StructureByteStride = structureByteStride;
+    srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+    // SRVの生成
+    directXCommon->GetDevice()->CreateShaderResourceView(pResource, &srvDesc, GetCPUDescriptorHandle(srvIndex));
+}
+
+void SrvManager::PreDraw()
+{
+    // 描画用のDescriptorHeapの設定
+    ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
+    directXCommon->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+}
+
+void SrvManager::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
+{
+    directXCommon->GetCommandList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
+}
+
+bool SrvManager::CanAllocate()
+{
+    // 現在使っている番号(useIndex)が、最大数(kMaxSRVCount)より小さければ true (まだいける！)
+    // そうでなければ false (もう無理！) を返す
+    return useIndex < kMaxSRVCount;
+}

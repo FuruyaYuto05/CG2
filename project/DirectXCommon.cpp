@@ -657,8 +657,8 @@ void DirectXCommon::PreDraw(){
 	commandList_->RSSetScissorRects(1, &scissorRect_);
 
 	// 描画用ディスクリプタヒープの設定 (SRVヒープを指定)
-	ID3D12DescriptorHeap* descripterHeaps[] = { srvDescriptorHeap_.Get() };
-	commandList_->SetDescriptorHeaps(1, descripterHeaps);
+	/*ID3D12DescriptorHeap* descripterHeaps[] = { srvDescriptorHeap_.Get() };
+	commandList_->SetDescriptorHeaps(1, descripterHeaps);*/
 
 }
 
