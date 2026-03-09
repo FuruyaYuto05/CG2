@@ -7,14 +7,17 @@
 #include "TextureManager.h"
 #include "Model.h"
 #include "ModelManager.h"
+#include "Camera.h"
 
 void Object3d::Initialize(Object3dCommon* object3dCommon)
 {
     // 引数で受け取ったポインタをメンバ変数に記録する
     this->object3dCommon = object3dCommon;
 
+    this->camera = object3dCommon->GetDefaultCamera();
+
     transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
-    cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.3f, 0.0f, 0.0f}, {0.0f, 4.0f, -10.0f} };
+    //cameraTransform = { {1.0f, 1.0f, 1.0f}, {0.3f, 0.0f, 0.0f}, {0.0f, 4.0f, -10.0f} };
 
     //// ↓ 追加：モデル読み込み
     //// (※ スライドに合わせて "plane.obj" を読み込む設定にしています)
@@ -184,21 +187,25 @@ void Object3d::CreateDirectionalLightData() {
 // ... (既存のインクルード) ...
 
 void Object3d::Update() {
-    // 1. Transform から WorldMatrix を作る
+    // 1. Transform から WorldMatrix を作る（これは今まで通り）
     Math::Matrix4x4 worldMatrix = Math::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 
-    // 2. cameraTransform から cameraMatrix を作る
-    Math::Matrix4x4 cameraMatrix = Math::MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+    Math::Matrix4x4 worldViewProjectionMatrix;
 
-    // 3. cameraMatrix から viewMatrix を作る
-    Math::Matrix4x4 viewMatrix = Math::Inverse(cameraMatrix);
+    // 2. カメラがセットされているかチェック
+    if (camera) {
+        // カメラから「ビュー行列 × プロジェクション行列」の合成行列をもらう
+        const Math::Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 
-    // 4. ProjectionMatrix を作って透視投影行列を書き込む
-    // (※ fovやクリップ距離は main.cpp で使っていた値を採用します)
-    Math::Matrix4x4 projectionMatrix = Math::MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
+        // オブジェクトのワールド行列と掛けて WVP 行列を完成させる
+        worldViewProjectionMatrix = Math::Multiply(worldMatrix, viewProjectionMatrix);
+    } else {
+        // カメラがセットされていない場合は、とりあえずワールド行列をそのまま入れておく（エラー回避）
+        worldViewProjectionMatrix = worldMatrix;
+    }
 
-    // 5. WVP行列を計算して定数バッファに書き込む
-    transformationMatrixData->WVP = Math::Multiply(worldMatrix, Math::Multiply(viewMatrix, projectionMatrix));
+    // 3. WVP行列とWorld行列を定数バッファに書き込む
+    transformationMatrixData->WVP = worldViewProjectionMatrix;
     transformationMatrixData->World = worldMatrix;
 }
 

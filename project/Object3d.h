@@ -12,6 +12,7 @@
 // 前方宣言
 class Object3dCommon;
 class Model;
+class Camera;
 
 // 3Dオブジェクト
 class Object3d
@@ -78,8 +79,10 @@ private: // メンバ変数
 
     Model* model_ = nullptr;
 
+    Camera* camera = nullptr;
+
     Math::Transform transform;
-    Math::Transform cameraTransform;
+   // Math::Transform cameraTransform;
 
     // 読み込んだモデルデータを保持する変数
     //ModelData modelData;
@@ -112,6 +115,9 @@ private: // メンバ変数
     void CreateDirectionalLightData();
 
 public:
+
+    void SetCamera(Camera* camera) { this->camera = camera; }
+
     // --- 追加：setter ---
     void SetScale(const Math::Vector3& scale) { transform.scale = scale; }
     void SetRotate(const Math::Vector3& rotate) { transform.rotate = rotate; }

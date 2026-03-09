@@ -28,6 +28,7 @@
 #include "Object3dCommon.h"
 #include "Object3d.h"
 #include "ModelManager.h"
+#include "Camera.h"
 
 
 using namespace Microsoft::WRL;
@@ -658,6 +659,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon = new Object3dCommon();
 	object3dCommon->Initialize(dxCommon);
 
+	Camera* camera = new Camera();
+	camera->SetRotate({ 0.0f, 0.0f, 0.0f });
+	camera->SetTranslate({ 0.0f, 0.0f, -5.0f }); // Z軸をマイナスにして少し引いた位置にする
+	object3dCommon->SetDefaultCamera(camera);
 
 	////DXGIファクトリーの作成
 	IDXGIFactory7* dxgiFactory = nullptr;
@@ -1234,6 +1239,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//object3d->Update();
 
+			camera->Update();
+
 			// 更新
 			object3d_1->Update();
 			object3d_2->Update();
@@ -1353,6 +1360,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Math::Vector3 axisobjRot = object3d_1->GetRotate();
 			if (ImGui::DragFloat3("axisobj Rotation", &axisobjRot.x, 0.01f)) {
 				object3d_2->SetRotate(axisobjRot);
+			}
+
+			ImGui::Text("--- Camera ---");
+
+			// カメラの現在の位置を取得して、ImGuiで操作できるようにする
+			Math::Vector3 cameraPos = camera->GetTranslate();
+			if (ImGui::DragFloat3("Camera Position", &cameraPos.x, 0.1f)) {
+				camera->SetTranslate(cameraPos);
+			}
+
+			// カメラの現在の角度を取得して、ImGuiで操作できるようにする
+			Math::Vector3 cameraRot = camera->GetRotate();
+			if (ImGui::DragFloat3("Camera Rotation", &cameraRot.x, 0.01f)) {
+				camera->SetRotate(cameraRot);
 			}
 
 			ImGui::End();
@@ -1508,6 +1529,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	delete object3d_1;
 	delete object3d_2;
+
+	delete camera;
 
 	delete sprite;
 
